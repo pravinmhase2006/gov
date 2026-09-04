@@ -21,8 +21,9 @@ router.get('/', async (req: Request, res: Response, next: NextFunction) => {
 // GET /api/jobs/:slug
 router.get('/:slug', async (req: Request, res: Response, next: NextFunction) => {
   try {
+    const slug = String(req.params.slug);
     const job = await prisma.job.findUnique({
-      where: { slug: req.params.slug },
+      where: { slug },
       include: { organization: true },
     });
     if (!job) {

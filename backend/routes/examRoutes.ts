@@ -19,8 +19,9 @@ router.get('/', async (req: Request, res: Response, next: NextFunction) => {
 // GET /api/exams/:slug
 router.get('/:slug', async (req: Request, res: Response, next: NextFunction) => {
   try {
+    const slug = String(req.params.slug);
     const exam = await prisma.exam.findUnique({
-      where: { slug: req.params.slug },
+      where: { slug },
       include: { organization: true },
     });
     if (!exam) {
