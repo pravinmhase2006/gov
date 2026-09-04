@@ -1,5 +1,5 @@
 import React from 'react';
-import Link from 'next/link';
+import Link from '@/components/common/Link';
 import { Building2, MapPin, Calendar, DollarSign, Award, ArrowRight, ShieldCheck } from 'lucide-react';
 import { formatDate } from '@/lib/utils';
 

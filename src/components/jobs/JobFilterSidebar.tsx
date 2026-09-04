@@ -1,7 +1,5 @@
-'use client';
-
 import React from 'react';
-import { useRouter, useSearchParams, usePathname } from 'next/navigation';
+import { useRouter, useSearchParams, usePathname } from '@/lib/navigation';
 import { Filter, X, RefreshCcw, Check } from 'lucide-react';
 
 interface FilterSidebarProps {

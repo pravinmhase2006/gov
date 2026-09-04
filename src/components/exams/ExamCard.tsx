@@ -1,5 +1,5 @@
 import React from 'react';
-import Link from 'next/link';
+import Link from '@/components/common/Link';
 import { BookOpen, Calendar, ArrowRight, Award, CheckCircle2, Clock } from 'lucide-react';
 import { ExamCardData } from '@/types';
 
