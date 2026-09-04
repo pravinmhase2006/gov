@@ -1,9 +1,9 @@
 import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import authRoutes from './routes/authRoutes';
-import jobRoutes from './routes/jobRoutes';
-import examRoutes from './routes/examRoutes';
+import authRoutes from './routes/authRoutes.js';
+import jobRoutes from './routes/jobRoutes.js';
+import examRoutes from './routes/examRoutes.js';
 
 dotenv.config();
 

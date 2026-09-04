@@ -1,7 +1,7 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import prisma from '../config/db';
+import prisma from '../config/db.js';
 
 const router = Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'govtprep-jwt-secret';
