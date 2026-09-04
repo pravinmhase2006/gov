@@ -8,7 +8,7 @@ router.get('/', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const exams = await prisma.exam.findMany({
       include: { organization: true },
-      orderBy: { viewsCount: 'desc' },
+      orderBy: { name: 'asc' },
     });
     res.json(exams);
   } catch (error) {

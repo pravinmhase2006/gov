@@ -1,0 +1,85 @@
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum JobStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+model User {
+  id            String    @id @default(auto()) @map("_id") @db.ObjectId
+  name          String
+  email         String    @unique
+  password      String
+  role          Role      @default(USER)
+  isVerified    Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Organization {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  name            String
+  shortName       String
+  category        String
+  officialWebsite String?
+  jobs            Job[]
+  exams           Exam[]
+}
+
+model Job {
+  id                      String        @id @default(auto()) @map("_id") @db.ObjectId
+  title                   String
+  slug                    String        @unique
+  organizationId          String        @db.ObjectId
+  organization            Organization  @relation(fields: [organizationId], references: [id])
+  postName                String
+  totalVacancies          Int
+  qualification           String
+  ageLimitMin             Int
+  ageLimitMax             Int
+  salaryText              String?
+  startDate               String
+  lastDate                String
+  examDate                String?
+  officialNotificationUrl String?
+  applyOnlineUrl          String?
+  selectionProcess        String?
+  status                  JobStatus     @default(PUBLISHED)
+  isFeatured              Boolean       @default(false)
+  isTrending              Boolean       @default(false)
+  state                   String?
+  category                String?
+  viewsCount              Int           @default(0)
+  createdAt               DateTime      @default(now())
+  updatedAt               DateTime      @updatedAt
+}
+
+model Exam {
+  id                  String        @id @default(auto()) @map("_id") @db.ObjectId
+  name                String
+  slug                String        @unique
+  code                String
+  organizationId      String        @db.ObjectId
+  organization        Organization  @relation(fields: [organizationId], references: [id])
+  frequency           String?
+  eligibilitySummary  String?
+  selectionProcess    String?
+  examPatternSummary  String?
+  isPopular           Boolean       @default(false)
+  viewsCount          Int           @default(0)
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+}
