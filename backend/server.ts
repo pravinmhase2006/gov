@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import authRoutes from './routes/authRoutes.js';
 import jobRoutes from './routes/jobRoutes.js';
 import examRoutes from './routes/examRoutes.js';
+import docsRoutes from './routes/docsRoutes.js';
 
 dotenv.config();
 
@@ -23,6 +24,11 @@ app.get('/api/health', (req: Request, res: Response) => {
     timestamp: new Date().toISOString(),
   });
 });
+
+// Interactive Swagger / OpenAPI Documentation
+app.use('/docs', docsRoutes);
+app.use('/api/docs', docsRoutes);
+app.use('/api-docs', docsRoutes);
 
 // Routes
 app.use('/api/auth', authRoutes);
