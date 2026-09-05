@@ -35,14 +35,14 @@ export default function ExamsPage() {
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
-        <div className="bg-gradient-to-r from-blue-900 to-indigo-900 rounded-3xl p-6 sm:p-8 text-white shadow-lg">
-          <div className="flex items-center gap-3">
-            <div className="p-3 bg-blue-500/20 border border-blue-400/30 rounded-2xl">
-              <GraduationCap className="w-8 h-8 text-saffron-400" />
+        <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-8 text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 shadow-sm">
+          <div className="flex items-center gap-4">
+            <div className="p-3.5 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800/50 rounded-2xl">
+              <GraduationCap className="w-8 h-8 text-blue-600 dark:text-blue-400" />
             </div>
             <div>
-              <h1 className="text-2xl sm:text-4xl font-black">All India Competitive Exams & Syllabus</h1>
-              <p className="text-xs sm:text-sm text-slate-300 mt-1">
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">All India Competitive Exams & Syllabus</h1>
+              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-1">
                 Explore comprehensive exam patterns, syllabus breakdowns, previous cutoffs, and prep resources.
               </p>
             </div>

@@ -1,16 +1,31 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BookOpen, Download, Search, FileText } from 'lucide-react';
+import { dataService } from '@/services/dataService';
 
 export default function SyllabusPage() {
   const [search, setSearch] = useState('');
-
-  const syllabusList = [
+  const [syllabusList, setSyllabusList] = useState<any[]>([
     { title: 'SSC CGL Tier 1 & Tier 2 Detailed Subject-Wise Syllabus 2026', exam: 'SSC CGL', size: '2.4 MB', downloadUrl: '#' },
     { title: 'UPSC Civil Services (Preliminary & Main) Detailed Syllabus PDF', exam: 'UPSC CSE', size: '3.1 MB', downloadUrl: '#' },
     { title: 'RRB NTPC CBT 1 & CBT 2 Topic-Wise Weightage & Syllabus 2026', exam: 'RRB NTPC', size: '1.8 MB', downloadUrl: '#' },
     { title: 'IBPS PO & Clerk Comprehensive Quantitative & Reasoning Syllabus', exam: 'IBPS PO', size: '2.0 MB', downloadUrl: '#' },
     { title: 'UP Police Constable Examination Syllabus & Physical Standards', exam: 'UP Police', size: '1.5 MB', downloadUrl: '#' },
-  ];
+  ]);
+
+  useEffect(() => {
+    async function loadDynamicSyllabus() {
+      const data = await dataService.getSyllabus();
+      if (data && data.length > 0) {
+        setSyllabusList(data.map((d: any) => ({
+          title: d.title,
+          exam: d.exam,
+          size: '2.5 MB',
+          downloadUrl: d.downloadUrl || '#',
+        })));
+      }
+    }
+    loadDynamicSyllabus();
+  }, []);
 
   const filtered = syllabusList.filter((s) =>
     s.title.toLowerCase().includes(search.toLowerCase()) ||
@@ -20,14 +35,14 @@ export default function SyllabusPage() {
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-5xl mx-auto space-y-6">
-        <div className="bg-gradient-to-r from-blue-900 to-indigo-900 rounded-3xl p-6 sm:p-8 text-white shadow-lg">
-          <div className="flex items-center gap-3">
-            <div className="p-3 bg-blue-500/20 border border-blue-400/30 rounded-2xl">
-              <FileText className="w-8 h-8 text-blue-300" />
+        <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-8 text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 shadow-sm">
+          <div className="flex items-center gap-4">
+            <div className="p-3.5 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800/50 rounded-2xl">
+              <FileText className="w-8 h-8 text-blue-600 dark:text-blue-400" />
             </div>
             <div>
-              <h1 className="text-2xl sm:text-4xl font-black">Official Exam Syllabus & Pattern 2026</h1>
-              <p className="text-xs sm:text-sm text-blue-200 mt-1">
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">Official Exam Syllabus & Pattern 2026</h1>
+              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-1">
                 Download verified chapter-wise syllabus, marks weightage, and negative marking schemes.
               </p>
             </div>

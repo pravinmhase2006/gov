@@ -17,14 +17,14 @@ export default function InternshipsPage() {
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-6xl mx-auto space-y-6">
-        <div className="bg-gradient-to-r from-teal-900 via-emerald-900 to-slate-900 rounded-3xl p-6 sm:p-8 text-white shadow-lg">
-          <div className="flex items-center gap-3">
-            <div className="p-3 bg-teal-500/20 border border-teal-400/30 rounded-2xl">
-              <Award className="w-8 h-8 text-teal-300" />
+        <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-8 text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 shadow-sm">
+          <div className="flex items-center gap-4">
+            <div className="p-3.5 bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-200 dark:border-emerald-800/50 rounded-2xl">
+              <Award className="w-8 h-8 text-emerald-600 dark:text-emerald-400" />
             </div>
             <div>
-              <h1 className="text-2xl sm:text-4xl font-black">Govt & Tech Internships 2026</h1>
-              <p className="text-xs sm:text-sm text-teal-200 mt-1">
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">Govt & Tech Internships 2026</h1>
+              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-1">
                 Stipend-based government fellowships, research internships, and software development student traineeships.
               </p>
             </div>

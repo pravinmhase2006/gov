@@ -183,6 +183,8 @@ const SAMPLE_FLASHCARDS: Flashcard[] = [
   }
 ];
 
+import { dataService } from '@/services/dataService';
+
 export default function FlashcardDeck() {
   const [cards, setCards] = useState<Flashcard[]>(SAMPLE_FLASHCARDS);
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
@@ -191,6 +193,29 @@ export default function FlashcardDeck() {
   const [masteryState, setMasteryState] = useState<Record<string, 'mastered' | 'review' | 'learning'>>({});
 
   useEffect(() => {
+    async function loadDynamicFlashcards() {
+      const apiCards = await dataService.getFlashcards();
+      if (apiCards && apiCards.length > 0) {
+        const mapped: Flashcard[] = apiCards.map((c: any) => ({
+          id: c.id,
+          category: (c.category || 'Polity') as any,
+          subCategory: c.subject || 'Core',
+          front: {
+            title: c.front || 'Concept Check',
+            question: c.front || '',
+            hint: `Difficulty: ${c.difficulty || 'Moderate'}`,
+          },
+          back: {
+            answer: c.back || '',
+            keyPoints: [c.back || ''],
+            examRelevance: `High Yield for ${c.subject || 'Exams'}`,
+          },
+        }));
+        setCards(mapped);
+      }
+    }
+    loadDynamicFlashcards();
+
     try {
       const saved = localStorage.getItem('govtprep_flashcards_mastery');
       if (saved) {
@@ -262,38 +287,43 @@ export default function FlashcardDeck() {
   return (
     <div className="space-y-6">
       {/* Header Banner */}
-      <div className="bg-gradient-to-r from-indigo-900 via-purple-900 to-slate-900 rounded-3xl p-6 sm:p-8 text-white shadow-xl relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-80 h-80 bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-8 text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 shadow-sm relative overflow-hidden">
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative z-10">
           <div className="space-y-2">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/20 text-purple-200 text-xs font-semibold border border-purple-400/20">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 text-xs font-semibold border border-purple-200 dark:border-purple-800/50">
               <Sparkles className="w-3.5 h-3.5" /> High-Yield Revision Engine
             </div>
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
+            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">
               Daily 3D Flashcards & Formula Deck
             </h1>
-            <p className="text-purple-100/80 text-sm max-w-xl">
+            <p className="text-slate-600 dark:text-slate-400 text-sm max-w-xl">
               Retain 300% more exam syllabus with active recall and spaced repetition for Static GK, Indian Polity Articles, Math Shortcuts, and Tech Core Concepts.
             </p>
           </div>
 
           {/* Quick Mastery Stat */}
-          <div className="flex items-center gap-4 bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/10 w-full md:w-auto justify-around">
+          <div className="flex items-center gap-6 bg-slate-50 dark:bg-slate-800/60 rounded-2xl p-4 border border-slate-200 dark:border-slate-700 w-full md:w-auto justify-around">
             <div className="text-center">
-              <div className="text-2xl font-black text-amber-300">{masteryPercentage}%</div>
-              <div className="text-xs text-purple-200">Mastery Rate</div>
+              <div className="text-2xl font-black text-purple-600 dark:text-purple-400">{masteryPercentage}%</div>
+              <div className="text-xs text-slate-500 dark:text-slate-400 font-medium">Mastery Rate</div>
             </div>
-            <div className="h-8 w-px bg-white/20" />
+            <div className="h-8 w-px bg-slate-200 dark:bg-slate-700" />
             <div className="text-center">
-              <div className="text-2xl font-black text-emerald-300">{totalMastered}/{cards.length}</div>
-              <div className="text-xs text-purple-200">Cards Mastered</div>
+              <div className="text-2xl font-black text-emerald-600 dark:text-emerald-400">{totalMastered}</div>
+              <div className="text-xs text-slate-500 dark:text-slate-400 font-medium">Mastered</div>
+            </div>
+            <div className="h-8 w-px bg-slate-200 dark:bg-slate-700" />
+            <div className="text-center">
+              <div className="text-2xl font-black text-blue-600 dark:text-blue-400">{cards.length}</div>
+              <div className="text-xs text-slate-500 dark:text-slate-400 font-medium">Total Deck</div>
             </div>
           </div>
         </div>
+      </div>
 
         {/* Category Filters */}
-        <div className="mt-6 flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
-          <Filter className="w-4 h-4 text-purple-300 shrink-0" />
+        <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none bg-white dark:bg-slate-900 p-3 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+          <Filter className="w-4 h-4 text-purple-600 dark:text-purple-400 shrink-0" />
           {categories.map((cat) => (
             <button
               key={cat}
@@ -302,10 +332,10 @@ export default function FlashcardDeck() {
                 setCurrentIndex(0);
                 setIsFlipped(false);
               }}
-              className={`px-3.5 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all ${
+              className={`px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${
                 selectedCategory === cat
-                  ? 'bg-white text-indigo-950 font-bold shadow-md shadow-purple-950/20'
-                  : 'bg-white/10 hover:bg-white/20 text-purple-200'
+                  ? 'bg-purple-600 text-white shadow-xs'
+                  : 'bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300'
               }`}
             >
               {cat}
@@ -313,13 +343,12 @@ export default function FlashcardDeck() {
           ))}
           <button
             onClick={handleShuffle}
-            className="ml-auto inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-purple-500/20 hover:bg-purple-500/30 text-purple-200 text-xs font-semibold border border-purple-400/20 transition-all shrink-0"
+            className="ml-auto inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-purple-50 dark:bg-purple-900/30 hover:bg-purple-100 dark:hover:bg-purple-900/50 text-purple-700 dark:text-purple-300 text-xs font-semibold border border-purple-200 dark:border-purple-800/50 transition-all shrink-0"
             title="Shuffle deck"
           >
             <Shuffle className="w-3.5 h-3.5" /> Shuffle
           </button>
         </div>
-      </div>
 
       {/* Main Flashcard Arena */}
       {currentCard ? (

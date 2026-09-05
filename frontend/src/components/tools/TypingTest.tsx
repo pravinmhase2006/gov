@@ -9,6 +9,8 @@ const SAMPLE_PASSAGES = [
   "National Informatics Centre and Indian Space Research Organisation are pioneer institutions in advancing India's indigenous software infrastructure and satellite telemetry. Engineering graduates with strong programming fundamentals, data structures, and cybersecurity knowledge contribute significantly to national mission critical operations.",
 ];
 
+import { dataService } from '@/services/dataService';
+
 export default function TypingTest() {
   const [duration, setDuration] = useState<number>(60); // 60, 300, 900 seconds
   const [timeLeft, setTimeLeft] = useState<number>(60);
@@ -16,10 +18,23 @@ export default function TypingTest() {
   const [isFinished, setIsFinished] = useState<boolean>(false);
 
   const [passage, setPassage] = useState<string>(SAMPLE_PASSAGES[0]);
+  const [passagesList, setPassagesList] = useState<string[]>(SAMPLE_PASSAGES);
   const [userInput, setUserInput] = useState<string>('');
   const [candidateName, setCandidateName] = useState<string>('Aspirant Candidate');
 
   const inputRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    async function loadDynamicPassages() {
+      const dynamicPassages = await dataService.getTypingPassages();
+      if (dynamicPassages && dynamicPassages.length > 0) {
+        const textArray = dynamicPassages.map((p: any) => p.text);
+        setPassagesList(textArray);
+        setPassage(textArray[0]);
+      }
+    }
+    loadDynamicPassages();
+  }, []);
 
   useEffect(() => {
     let timer: any = null;
@@ -68,24 +83,24 @@ export default function TypingTest() {
     <div className="space-y-8">
       
       {/* Header */}
-      <div className="bg-gradient-to-r from-blue-900 via-indigo-950 to-slate-900 text-white rounded-3xl p-8 sm:p-10 shadow-xl border border-blue-800 space-y-3 print:hidden">
-        <span className="inline-block px-3 py-1 bg-saffron-500 text-white text-xs font-bold rounded-full uppercase tracking-wider">
-          DEST Typing Skill Test
-        </span>
-        <h1 className="text-2xl sm:text-4xl font-black tracking-tight">
+      <div className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-3xl p-6 sm:p-8 shadow-sm border border-slate-200 dark:border-slate-800 space-y-3 print:hidden">
+        <div className="inline-flex items-center gap-2 px-3 py-1 bg-saffron-50 dark:bg-saffron-950/50 border border-saffron-200 dark:border-saffron-800 text-saffron-700 dark:text-saffron-400 text-xs font-bold rounded-full uppercase tracking-wider">
+          <Zap className="w-3.5 h-3.5" /> DEST Typing Skill Test
+        </div>
+        <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900 dark:text-white">
           SSC CGL / CHSL &amp; Railway Live Typing Test Simulator
         </h1>
-        <p className="text-slate-300 text-xs sm:text-sm max-w-2xl leading-relaxed">
+        <p className="text-slate-600 dark:text-slate-300 text-xs sm:text-sm max-w-2xl leading-relaxed">
           Practice standard 35 WPM / 2000 key depressions typing test with real-time accuracy scoring, mistake highlighting, and downloadable typing certificate.
         </p>
 
         {/* Duration Selectors & Controls */}
-        <div className="flex flex-wrap items-center gap-3 pt-4">
-          <span className="text-xs font-bold text-slate-300">Test Duration:</span>
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3 pt-3">
+          <span className="text-xs font-bold text-slate-500 dark:text-slate-400">Test Duration:</span>
           {[
-            { label: '1 Minute (Quick Test)', sec: 60 },
-            { label: '5 Minutes (Speed Drill)', sec: 300 },
-            { label: '15 Minutes (SSC DEST Exam Mode)', sec: 900 },
+            { label: '1 Min (Quick)', sec: 60 },
+            { label: '5 Mins (Speed Drill)', sec: 300 },
+            { label: '15 Mins (SSC Exam Mode)', sec: 900 },
           ].map((item) => (
             <button
               key={item.sec}
@@ -98,7 +113,7 @@ export default function TypingTest() {
               className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
                 duration === item.sec
                   ? 'bg-blue-600 text-white shadow-xs'
-                  : 'bg-slate-800 hover:bg-slate-700 text-slate-300'
+                  : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300'
               }`}
             >
               {item.label}

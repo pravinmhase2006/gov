@@ -25,14 +25,14 @@ export default function TechJobsPage() {
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-6xl mx-auto space-y-6">
-        <div className="bg-gradient-to-r from-indigo-900 via-blue-900 to-slate-900 rounded-3xl p-6 sm:p-8 text-white shadow-lg">
-          <div className="flex items-center gap-3">
-            <div className="p-3 bg-indigo-500/20 border border-indigo-400/30 rounded-2xl">
-              <Cpu className="w-8 h-8 text-indigo-300" />
+        <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-8 text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 shadow-sm">
+          <div className="flex items-center gap-4">
+            <div className="p-3.5 bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-200 dark:border-indigo-800/50 rounded-2xl">
+              <Cpu className="w-8 h-8 text-indigo-600 dark:text-indigo-400" />
             </div>
             <div>
-              <h1 className="text-2xl sm:text-4xl font-black">Tech & Software Careers in Bharat</h1>
-              <p className="text-xs sm:text-sm text-indigo-200 mt-1">
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">Tech & Software Careers in Bharat</h1>
+              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-1">
                 Curated IT, Full-Stack, Python, and AI developer job opportunities with salary transparencies.
               </p>
             </div>

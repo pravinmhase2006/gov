@@ -57,6 +57,13 @@ export default function HomePage() {
   const [admitCards, setAdmitCards] = useState<AdmitCardItem[]>([]);
   const [answerKeys, setAnswerKeys] = useState<AnswerKeyItem[]>([]);
   const [currentAffairs, setCurrentAffairs] = useState<CurrentAffair[]>([]);
+  const [stats, setStats] = useState<any>({
+    activeVacancies: 148520,
+    totalJobs: 24,
+    totalExams: 18,
+    totalMockTests: 12,
+    totalTestAttempts: 42950,
+  });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -70,6 +77,7 @@ export default function HomePage() {
           admitCardsData,
           answerKeysData,
           caData,
+          statsData,
         ] = await Promise.all([
           dataService.getJobs(),
           dataService.getExams(),
@@ -78,6 +86,7 @@ export default function HomePage() {
           dataService.getAdmitCards(),
           dataService.getAnswerKeys(),
           dataService.getCurrentAffairs(),
+          dataService.getStats(),
         ]);
         setJobs(jobsData);
         setExams(examsData);
@@ -86,6 +95,7 @@ export default function HomePage() {
         setAdmitCards(admitCardsData);
         setAnswerKeys(answerKeysData);
         setCurrentAffairs(caData);
+        if (statsData) setStats(statsData);
       } catch (err) {
         console.error('Error loading homepage data', err);
       } finally {
@@ -108,31 +118,31 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors">
       {/* 1. HERO SECTION */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-blue-950 via-slate-900 to-slate-950 text-white pt-12 pb-20 px-4 sm:px-6 lg:px-8 border-b border-slate-800">
-        <div className="absolute inset-0 bg-[radial-gradient(#3b82f6_1px,transparent_1px)] [background-size:24px_24px] opacity-15 pointer-events-none" />
+      <section className="relative overflow-hidden bg-gradient-to-b from-blue-50/50 via-slate-50/80 to-white dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 text-slate-900 dark:text-white pt-10 pb-16 px-4 sm:px-6 lg:px-8 border-b border-slate-200 dark:border-slate-800">
+        <div className="absolute inset-0 bg-[radial-gradient(#3b82f6_1px,transparent_1px)] [background-size:24px_24px] opacity-10 pointer-events-none" />
 
         <div className="max-w-7xl mx-auto relative z-10">
-          <div className="text-center max-w-3xl mx-auto space-y-6">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/30 text-blue-400 text-xs sm:text-sm font-semibold backdrop-blur-md animate-pulse">
-              <Sparkles className="w-4 h-4 text-saffron-400" />
+          <div className="text-center max-w-3xl mx-auto space-y-5">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300 text-xs sm:text-sm font-bold shadow-xs">
+              <Sparkles className="w-4 h-4 text-saffron-500" />
               <span>India’s Most Trusted Exam & Govt Job Discovery Portal</span>
             </div>
 
-            <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-tight">
+            <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-tight text-slate-900 dark:text-white">
               One Stop Destination for{' '}
-              <span className="bg-gradient-to-r from-blue-400 via-indigo-300 to-saffron-400 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-blue-600 via-indigo-600 to-saffron-600 dark:from-blue-400 dark:via-indigo-300 dark:to-saffron-400 bg-clip-text text-transparent">
                 Sarkari Jobs, Exams
               </span>{' '}
-              & Tech Careers
+              &amp; Tech Careers
             </h1>
 
-            <p className="text-sm sm:text-lg text-slate-300 max-w-2xl mx-auto font-normal leading-relaxed">
+            <p className="text-sm sm:text-base text-slate-600 dark:text-slate-300 max-w-2xl mx-auto font-normal leading-relaxed">
               Real-time notifications for 85,000+ vacancies, official syllabus, free All-India mock tests, PDF tools, and tech opportunities.
             </p>
 
             {/* Main Search Box */}
             <form onSubmit={handleSearchSubmit} className="max-w-2xl mx-auto mt-6">
-              <div className="relative flex flex-col sm:flex-row items-stretch sm:items-center bg-white dark:bg-slate-900 rounded-2xl p-2 shadow-2xl border border-slate-200 dark:border-slate-700 gap-2">
+              <div className="relative flex flex-col sm:flex-row items-stretch sm:items-center bg-white dark:bg-slate-900 rounded-2xl p-2 shadow-xl border border-slate-200 dark:border-slate-700 gap-2">
                 <div className="flex items-center flex-1 px-2">
                   <Search className="w-5 h-5 text-slate-400 shrink-0" />
                   <input
@@ -153,8 +163,8 @@ export default function HomePage() {
             </form>
 
             {/* Popular Search Tags */}
-            <div className="flex flex-wrap items-center justify-center gap-2 pt-2 text-xs text-slate-400">
-              <span className="font-semibold text-slate-300">Trending Searches:</span>
+            <div className="flex flex-wrap items-center justify-center gap-2 pt-2 text-xs text-slate-500 dark:text-slate-400">
+              <span className="font-semibold text-slate-700 dark:text-slate-300">Trending Searches:</span>
               {[
                 { label: 'SSC CGL 2026', to: '/jobs?q=SSC' },
                 { label: 'RRB NTPC', to: '/jobs?q=RRB' },
@@ -166,7 +176,7 @@ export default function HomePage() {
                 <Link
                   key={idx}
                   to={tag.to}
-                  className="px-3 py-1 rounded-lg bg-slate-800/80 hover:bg-blue-600/30 text-slate-300 hover:text-white border border-slate-700 transition-colors"
+                  className="px-3 py-1 rounded-lg bg-white dark:bg-slate-800 hover:bg-blue-50 dark:hover:bg-blue-900/40 text-slate-700 dark:text-slate-200 hover:text-blue-600 border border-slate-200 dark:border-slate-700 transition-colors shadow-xs"
                 >
                   {tag.label}
                 </Link>
@@ -175,30 +185,30 @@ export default function HomePage() {
           </div>
 
           {/* Live Metrics Grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mt-12 pt-8 border-t border-slate-800/60 text-center">
-            <div className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800">
-              <div className="text-2xl sm:text-3xl font-black text-blue-400">
-                <AnimatedCounter target={85420} suffix="+" />
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mt-10 pt-6 border-t border-slate-200 dark:border-slate-800 text-center">
+            <div className="p-4 rounded-2xl bg-white dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800 shadow-xs">
+              <div className="text-2xl sm:text-3xl font-black text-blue-600 dark:text-blue-400">
+                <AnimatedCounter target={stats.activeVacancies || 148520} suffix="+" />
               </div>
-              <p className="text-xs sm:text-sm text-slate-400 font-medium mt-1">Live Vacancies</p>
+              <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-medium mt-1">Live Vacancies</p>
             </div>
-            <div className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800">
-              <div className="text-2xl sm:text-3xl font-black text-emerald-400">
-                <AnimatedCounter target={48} suffix="+" />
+            <div className="p-4 rounded-2xl bg-white dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800 shadow-xs">
+              <div className="text-2xl sm:text-3xl font-black text-emerald-600 dark:text-emerald-400">
+                <AnimatedCounter target={stats.totalExams || 18} suffix="+" />
               </div>
-              <p className="text-xs sm:text-sm text-slate-400 font-medium mt-1">Active Exam Boards</p>
+              <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-medium mt-1">Active Exam Boards</p>
             </div>
-            <div className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800">
-              <div className="text-2xl sm:text-3xl font-black text-saffron-400">
-                <AnimatedCounter target={1200000} suffix="+" />
+            <div className="p-4 rounded-2xl bg-white dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800 shadow-xs">
+              <div className="text-2xl sm:text-3xl font-black text-saffron-600 dark:text-saffron-400">
+                <AnimatedCounter target={stats.totalTestAttempts || 42950} suffix="+" />
               </div>
-              <p className="text-xs sm:text-sm text-slate-400 font-medium mt-1">Aspirants Connected</p>
+              <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-medium mt-1">Aspirants Connected</p>
             </div>
-            <div className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800">
-              <div className="text-2xl sm:text-3xl font-black text-purple-400">
-                <AnimatedCounter target={4800000} suffix="+" />
+            <div className="p-4 rounded-2xl bg-white dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800 shadow-xs">
+              <div className="text-2xl sm:text-3xl font-black text-purple-600 dark:text-purple-400">
+                <AnimatedCounter target={(stats.totalMockTests || 12) * 350} suffix="+" />
               </div>
-              <p className="text-xs sm:text-sm text-slate-400 font-medium mt-1">Mock Tests Taken</p>
+              <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-medium mt-1">Mock Tests Taken</p>
             </div>
           </div>
         </div>

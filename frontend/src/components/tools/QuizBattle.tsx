@@ -87,7 +87,10 @@ const BATTLE_QUESTIONS: BattleQuestion[] = [
   }
 ];
 
+import { dataService } from '@/services/dataService';
+
 export default function QuizBattle() {
+  const [questions, setQuestions] = useState<BattleQuestion[]>(BATTLE_QUESTIONS);
   const [gameState, setGameState] = useState<'lobby' | 'playing' | 'ended'>('lobby');
   const [currentQIndex, setCurrentQIndex] = useState(0);
   const [timeLeft, setTimeLeft] = useState(60);
@@ -98,7 +101,25 @@ export default function QuizBattle() {
   const [isAnswerRevealed, setIsAnswerRevealed] = useState(false);
   const [opponentName, setOpponentName] = useState('AspirantBot AI (Rank 14)');
 
-  const currentQuestion = BATTLE_QUESTIONS[currentQIndex];
+  useEffect(() => {
+    async function loadDynamicQuestions() {
+      const apiQuestions = await dataService.getQuizQuestions();
+      if (apiQuestions && apiQuestions.length > 0) {
+        const mapped: BattleQuestion[] = apiQuestions.map((q: any) => ({
+          id: q.id,
+          topic: q.subject || 'General Knowledge',
+          question: q.question,
+          options: q.options,
+          correct: q.correctIndex !== undefined ? q.correctIndex : 0,
+          explanation: `Correct Answer: ${q.options[q.correctIndex || 0]}`,
+        }));
+        setQuestions(mapped);
+      }
+    }
+    loadDynamicQuestions();
+  }, []);
+
+  const currentQuestion = questions[currentQIndex] || questions[0];
 
   // Game countdown timer
   useEffect(() => {

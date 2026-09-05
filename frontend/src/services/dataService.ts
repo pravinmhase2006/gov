@@ -779,17 +779,18 @@ export const MOCK_CURRENT_AFFAIRS: CurrentAffair[] = [
   },
 ];
 
-// Async Data API Layer
+// Async Dynamic Data API Layer
 export const dataService = {
   async getJobs(): Promise<Job[]> {
     try {
       const data = await apiRequest<Job[]>('/jobs');
       if (Array.isArray(data) && data.length > 0) return data;
     } catch {
-      // Fallback to local dataset if API is offline
+      // Resilient fallback
     }
     return MOCK_JOBS;
   },
+
   async getJobBySlug(slug: string): Promise<Job | undefined> {
     try {
       const data = await apiRequest<Job>(`/jobs/${slug}`);
@@ -799,6 +800,7 @@ export const dataService = {
     }
     return MOCK_JOBS.find((j) => j.slug === slug);
   },
+
   async getFeaturedJobs(): Promise<Job[]> {
     try {
       const jobs = await this.getJobs();
@@ -807,6 +809,7 @@ export const dataService = {
       return MOCK_JOBS.filter((j) => j.isFeatured);
     }
   },
+
   async getExams(): Promise<Exam[]> {
     try {
       const data = await apiRequest<Exam[]>('/exams');
@@ -816,6 +819,7 @@ export const dataService = {
     }
     return MOCK_EXAMS;
   },
+
   async getExamBySlug(slug: string): Promise<Exam | undefined> {
     try {
       const data = await apiRequest<Exam>(`/exams/${slug}`);
@@ -825,15 +829,37 @@ export const dataService = {
     }
     return MOCK_EXAMS.find((e) => e.slug === slug);
   },
+
   async getTechJobs(): Promise<TechJob[]> {
+    try {
+      const data = await apiRequest<TechJob[]>('/tech-jobs');
+      if (Array.isArray(data) && data.length > 0) return data;
+    } catch {
+      // Fallback
+    }
     return MOCK_TECH_JOBS;
   },
+
   async getTechCourses(): Promise<TechCourse[]> {
+    try {
+      const data = await apiRequest<TechCourse[]>('/content/tech-courses');
+      if (Array.isArray(data) && data.length > 0) return data;
+    } catch {
+      // Fallback
+    }
     return MOCK_TECH_COURSES;
   },
+
   async getInternships(): Promise<Internship[]> {
+    try {
+      const data = await apiRequest<Internship[]>('/content/internships');
+      if (Array.isArray(data) && data.length > 0) return data;
+    } catch {
+      // Fallback
+    }
     return MOCK_INTERNSHIPS;
   },
+
   async getMockTests(): Promise<MockTest[]> {
     try {
       const data = await apiRequest<MockTest[]>('/tests');
@@ -843,6 +869,7 @@ export const dataService = {
     }
     return MOCK_TESTS;
   },
+
   async getMockTestBySlug(slug: string): Promise<MockTest | undefined> {
     try {
       const data = await apiRequest<MockTest>(`/tests/${slug}`);
@@ -852,6 +879,7 @@ export const dataService = {
     }
     return MOCK_TESTS.find((t) => t.slug === slug);
   },
+
   async submitMockTest(slug: string, submission: { answers: Record<string, string>; timeTakenSeconds: number; candidateName?: string }) {
     try {
       return await apiRequest<any>(`/tests/${slug}/submit`, {
@@ -859,30 +887,169 @@ export const dataService = {
         body: JSON.stringify(submission),
       });
     } catch (e) {
-      console.warn('Backend test submit failed, using client calculations', e);
+      console.warn('Backend test submit failed, fallback to client calculations', e);
       return null;
     }
   },
+
+  async getStats() {
+    try {
+      const stats = await apiRequest<any>('/content/stats');
+      if (stats) return stats;
+    } catch {
+      // Fallback
+    }
+    return {
+      activeVacancies: 148520,
+      totalJobs: 24,
+      totalExams: 18,
+      totalMockTests: 12,
+      totalTestAttempts: 42950,
+      activeAspirantsOnline: 350,
+      verifiedUpdatesToday: 18,
+      avgAccuracyRate: '78.4%',
+    };
+  },
+
+  async getTickers(): Promise<{ id: string; title: string; link: string; tag: string }[]> {
+    try {
+      const tickers = await apiRequest<any[]>('/content/tickers');
+      if (Array.isArray(tickers) && tickers.length > 0) return tickers;
+    } catch {
+      // Fallback
+    }
+    return [
+      { id: '1', title: 'SSC CGL 2026 Tier-1 Direct Admit Card Download Live', link: '/admit-cards', tag: 'URGENT' },
+      { id: '2', title: 'Railway RRB NTPC 11,558 Vacancies Application Portal Closing Soon', link: '/jobs', tag: 'DEADLINE' },
+      { id: '3', title: 'UPSC Civil Services Prelims 2026 Notification & Syllabus PDF Released', link: '/syllabus', tag: 'NEW' },
+      { id: '4', title: 'IBPS PO 2026 Final Merit List & Cutoff Marks Declared', link: '/results', tag: 'RESULT' },
+    ];
+  },
+
+  async getLeaderboard(): Promise<any[]> {
+    try {
+      const data = await apiRequest<any[]>('/content/leaderboard');
+      if (Array.isArray(data) && data.length > 0) return data;
+    } catch {
+      // Fallback
+    }
+    return [
+      { id: '1', rank: 1, name: 'Aditya Sharma', state: 'Uttar Pradesh', score: 194.5, accuracy: '98.2%', streakDays: 42, avatar: '👨‍🎓' },
+      { id: '2', rank: 2, name: 'Pooja Deshmukh', state: 'Maharashtra', score: 191.0, accuracy: '96.5%', streakDays: 38, avatar: '👩‍🎓' },
+      { id: '3', rank: 3, name: 'Vikram Singh Rawat', state: 'Rajasthan', score: 188.0, accuracy: '95.0%', streakDays: 35, avatar: '👨‍🎓' },
+      { id: '4', rank: 4, name: 'Ananya Roy', state: 'West Bengal', score: 184.5, accuracy: '94.2%', streakDays: 29, avatar: '👩‍🎓' },
+    ];
+  },
+
+  async submitLeaderboard(entry: { name: string; state?: string; score: number; accuracy?: string }) {
+    try {
+      return await apiRequest<any>('/content/leaderboard', {
+        method: 'POST',
+        body: JSON.stringify(entry),
+      });
+    } catch {
+      return null;
+    }
+  },
+
+  async getFlashcards(): Promise<any[]> {
+    try {
+      const data = await apiRequest<any[]>('/content/flashcards');
+      if (Array.isArray(data) && data.length > 0) return data;
+    } catch {
+      // Fallback
+    }
+    return [];
+  },
+
+  async getTypingPassages(): Promise<any[]> {
+    try {
+      const data = await apiRequest<any[]>('/content/typing-passages');
+      if (Array.isArray(data) && data.length > 0) return data;
+    } catch {
+      // Fallback
+    }
+    return [];
+  },
+
+  async getQuizQuestions(): Promise<any[]> {
+    try {
+      const data = await apiRequest<any[]>('/content/quiz-questions');
+      if (Array.isArray(data) && data.length > 0) return data;
+    } catch {
+      // Fallback
+    }
+    return [];
+  },
+
+  async getSyllabus(): Promise<any[]> {
+    try {
+      const data = await apiRequest<any[]>('/content/syllabus');
+      if (Array.isArray(data) && data.length > 0) return data;
+    } catch {
+      // Fallback
+    }
+    return [];
+  },
+
+  async getPreviousPapers(): Promise<any[]> {
+    try {
+      const data = await apiRequest<any[]>('/content/previous-papers');
+      if (Array.isArray(data) && data.length > 0) return data;
+    } catch {
+      // Fallback
+    }
+    return [];
+  },
+
   async getResults(): Promise<ResultItem[]> {
     return MOCK_RESULTS;
   },
+
   async getAdmitCards(): Promise<AdmitCardItem[]> {
     return MOCK_ADMIT_CARDS;
   },
+
   async getAnswerKeys(): Promise<AnswerKeyItem[]> {
     return MOCK_ANSWER_KEYS;
   },
+
   async getCurrentAffairs(): Promise<CurrentAffair[]> {
+    try {
+      const data = await apiRequest<any[]>('/content/current-affairs');
+      if (Array.isArray(data) && data.length > 0) {
+        return data.map((d: any) => ({
+          id: d.id,
+          title: d.title,
+          slug: d.id,
+          category: d.category,
+          summary: d.summary,
+          content: d.summary,
+          publishedAt: d.date || '2026-03-05',
+          readTime: d.readTime || '3 min read',
+          tags: d.tags || ['GK'],
+        }));
+      }
+    } catch {
+      // Fallback
+    }
     return MOCK_CURRENT_AFFAIRS;
   },
+
   async searchAll(query: string) {
     const q = query.toLowerCase();
-    const jobs = (await this.getJobs()).filter(
+    const [jobs, exams, techJobs] = await Promise.all([
+      this.getJobs(),
+      this.getExams(),
+      this.getTechJobs(),
+    ]);
+
+    const filteredJobs = jobs.filter(
       (j) => j.title.toLowerCase().includes(q) || (j.organization?.name || '').toLowerCase().includes(q) || (j.qualification || '').toLowerCase().includes(q)
     );
-    const exams = (await this.getExams()).filter((e) => e.name.toLowerCase().includes(q) || e.code.toLowerCase().includes(q));
-    const techJobs = MOCK_TECH_JOBS.filter((t) => t.title.toLowerCase().includes(q) || t.skills.some((s) => s.toLowerCase().includes(q)));
-    return { jobs, exams, techJobs };
+    const filteredExams = exams.filter((e) => e.name.toLowerCase().includes(q) || e.code.toLowerCase().includes(q));
+    const filteredTech = techJobs.filter((t) => t.title.toLowerCase().includes(q) || t.skills.some((s) => s.toLowerCase().includes(q)));
+    return { jobs: filteredJobs, exams: filteredExams, techJobs: filteredTech };
   },
 };
 

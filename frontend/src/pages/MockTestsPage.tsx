@@ -17,17 +17,17 @@ export default function MockTestsPage() {
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-6xl mx-auto space-y-6">
-        <div className="bg-gradient-to-r from-rose-900 via-pink-900 to-indigo-900 rounded-3xl p-6 sm:p-8 text-white shadow-lg">
-          <div className="flex items-center gap-3">
-            <div className="p-3 bg-rose-500/20 border border-rose-400/30 rounded-2xl">
-              <Layers className="w-8 h-8 text-rose-300" />
+        <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-8 text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 shadow-sm">
+          <div className="flex items-center gap-4">
+            <div className="p-3.5 bg-rose-50 dark:bg-rose-900/30 border border-rose-200 dark:border-rose-800/50 rounded-2xl">
+              <Layers className="w-8 h-8 text-rose-600 dark:text-rose-400" />
             </div>
             <div>
-              <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-rose-500/30 text-rose-300 text-[10px] font-bold mb-1">
+              <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-rose-50 dark:bg-rose-900/40 text-rose-700 dark:text-rose-300 text-[10px] font-bold mb-1 border border-rose-200 dark:border-rose-800">
                 <Sparkles className="w-3 h-3" /> Real Exam Interface CBT
               </div>
-              <h1 className="text-2xl sm:text-4xl font-black">Free All-India Live Mock Tests</h1>
-              <p className="text-xs sm:text-sm text-rose-100 mt-1">
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">Free All-India Live Mock Tests</h1>
+              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-1">
                 Practice in the exact NTA/TCS CBT software pattern with instant AI scorecards, rank predictors, and section analytics.
               </p>
             </div>

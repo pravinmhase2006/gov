@@ -5,6 +5,8 @@ import authRoutes from './routes/authRoutes.js';
 import jobRoutes from './routes/jobRoutes.js';
 import examRoutes from './routes/examRoutes.js';
 import testRoutes from './routes/testRoutes.js';
+import techRoutes from './routes/techRoutes.js';
+import contentRoutes from './routes/contentRoutes.js';
 import docsRoutes from './routes/docsRoutes.js';
 
 dotenv.config();
@@ -31,11 +33,13 @@ app.use('/docs', docsRoutes);
 app.use('/api/docs', docsRoutes);
 app.use('/api-docs', docsRoutes);
 
-// Routes
+// Dynamic Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/jobs', jobRoutes);
 app.use('/api/exams', examRoutes);
 app.use('/api/tests', testRoutes);
+app.use('/api/tech-jobs', techRoutes);
+app.use('/api/content', contentRoutes);
 
 // Global Error Handler
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {

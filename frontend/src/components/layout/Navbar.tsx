@@ -231,7 +231,7 @@ export default function Navbar({ initialUser = null }: NavbarProps) {
       </div>
 
       {/* Primary Navigation Bar (Desktop) */}
-      <nav className="hidden lg:block bg-slate-900 border-t border-slate-800 text-white text-sm font-medium">
+      <nav className="hidden lg:block bg-white dark:bg-slate-900 border-t border-b border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200 text-sm font-medium shadow-xs">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <ul className="flex items-center justify-between">
             
@@ -240,8 +240,10 @@ export default function Navbar({ initialUser = null }: NavbarProps) {
               <li>
                 <Link
                   href="/"
-                  className={`px-3 py-2.5 block hover:bg-slate-800 rounded transition-colors ${
-                    pathname === '/' ? 'bg-blue-600 text-white font-semibold' : 'text-slate-200 hover:text-white'
+                  className={`px-3 py-2 block rounded-md transition-colors ${
+                    pathname === '/'
+                      ? 'bg-blue-600 text-white font-semibold shadow-xs'
+                      : 'text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-blue-600 dark:hover:text-blue-400'
                   }`}
                 >
                   Home
@@ -256,10 +258,10 @@ export default function Navbar({ initialUser = null }: NavbarProps) {
               >
                 <Link
                   href="/jobs"
-                  className={`px-3 py-2.5 flex items-center gap-1.5 hover:bg-slate-800 rounded transition-colors ${
+                  className={`px-3 py-2 flex items-center gap-1.5 rounded-md transition-colors ${
                     pathname.startsWith('/jobs') || pathname.startsWith('/qualification')
-                      ? 'bg-slate-800 text-blue-400 font-semibold'
-                      : 'text-slate-200 hover:text-white'
+                      ? 'bg-blue-50 dark:bg-blue-900/40 text-blue-700 dark:text-blue-400 font-semibold'
+                      : 'text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-blue-600 dark:hover:text-blue-400'
                   }`}
                 >
                   <span>Govt Jobs</span>
@@ -344,13 +346,13 @@ export default function Navbar({ initialUser = null }: NavbarProps) {
                 onMouseLeave={() => setActiveDropdown(null)}
               >
                 <button
-                  className={`px-3 py-2.5 flex items-center gap-1.5 hover:bg-slate-800 rounded transition-colors ${
+                  className={`px-3 py-2 flex items-center gap-1.5 rounded-md transition-colors ${
                     pathname.startsWith('/tech') || pathname.startsWith('/internships')
-                      ? 'bg-slate-800 text-purple-400 font-semibold'
-                      : 'text-slate-200 hover:text-white'
+                      ? 'bg-purple-50 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300 font-semibold'
+                      : 'text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-purple-600 dark:hover:text-purple-400'
                   }`}
                 >
-                  <Laptop className="w-3.5 h-3.5 text-purple-400" />
+                  <Laptop className="w-3.5 h-3.5 text-purple-500" />
                   <span>Tech & Internships</span>
                   <ChevronDown className="w-3.5 h-3.5" />
                 </button>
@@ -394,8 +396,10 @@ export default function Navbar({ initialUser = null }: NavbarProps) {
               <li>
                 <Link
                   href="/exams"
-                  className={`px-3 py-2.5 block hover:bg-slate-800 rounded transition-colors ${
-                    pathname.startsWith('/exams') ? 'bg-slate-800 text-blue-400 font-semibold' : 'text-slate-200 hover:text-white'
+                  className={`px-3 py-2 block rounded-md transition-colors ${
+                    pathname.startsWith('/exams')
+                      ? 'bg-blue-50 dark:bg-blue-900/40 text-blue-700 dark:text-blue-400 font-semibold'
+                      : 'text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-blue-600 dark:hover:text-blue-400'
                   }`}
                 >
                   Exams
@@ -405,8 +409,10 @@ export default function Navbar({ initialUser = null }: NavbarProps) {
               <li>
                 <Link
                   href="/mock-tests"
-                  className={`px-3 py-2.5 flex items-center gap-1.5 hover:bg-slate-800 rounded transition-colors ${
-                    pathname.startsWith('/mock-tests') ? 'bg-slate-800 text-amber-400 font-semibold' : 'text-slate-200 hover:text-white'
+                  className={`px-3 py-2 flex items-center gap-1.5 rounded-md transition-colors ${
+                    pathname.startsWith('/mock-tests')
+                      ? 'bg-amber-50 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 font-semibold'
+                      : 'text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-amber-600 dark:hover:text-amber-400'
                   }`}
                 >
                   <span>Free Mock Tests</span>
@@ -423,10 +429,10 @@ export default function Navbar({ initialUser = null }: NavbarProps) {
                 onMouseLeave={() => setActiveDropdown(null)}
               >
                 <button
-                  className={`px-3 py-2.5 flex items-center gap-1.5 hover:bg-slate-800 rounded transition-colors ${
+                  className={`px-3 py-2 flex items-center gap-1.5 rounded-md transition-colors ${
                     pathname.startsWith('/results') || pathname.startsWith('/admit-cards') || pathname.startsWith('/answer-keys')
-                      ? 'bg-slate-800 text-emerald-400 font-semibold'
-                      : 'text-slate-200 hover:text-white'
+                      ? 'bg-emerald-50 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 font-semibold'
+                      : 'text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-emerald-600 dark:hover:text-emerald-400'
                   }`}
                 >
                   <span>Results & Updates</span>
@@ -463,13 +469,13 @@ export default function Navbar({ initialUser = null }: NavbarProps) {
                 onMouseLeave={() => setActiveDropdown(null)}
               >
                 <button
-                  className={`px-3 py-2.5 flex items-center gap-1.5 hover:bg-slate-800 rounded transition-colors ${
+                  className={`px-3 py-2 flex items-center gap-1.5 rounded-md transition-colors ${
                     pathname.startsWith('/current-affairs') || pathname.startsWith('/syllabus') || pathname.startsWith('/study-material') || pathname.startsWith('/previous-papers')
-                      ? 'bg-slate-800 text-sky-400 font-semibold'
-                      : 'text-slate-200 hover:text-white'
+                      ? 'bg-sky-50 dark:bg-sky-900/40 text-sky-700 dark:text-sky-300 font-semibold'
+                      : 'text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-sky-600 dark:hover:text-sky-400'
                   }`}
                 >
-                  <BookOpen className="w-3.5 h-3.5 text-sky-400" />
+                  <BookOpen className="w-3.5 h-3.5 text-sky-500" />
                   <span>Study Hub</span>
                   <ChevronDown className="w-3.5 h-3.5" />
                 </button>
@@ -509,11 +515,13 @@ export default function Navbar({ initialUser = null }: NavbarProps) {
                 onMouseLeave={() => setActiveDropdown(null)}
               >
                 <button
-                  className={`px-3 py-2.5 flex items-center gap-1.5 hover:bg-slate-800 rounded transition-colors ${
-                    activeDropdown === 'tools' ? 'bg-slate-800 text-amber-400 font-semibold' : 'text-slate-200 hover:text-white'
+                  className={`px-3 py-2 flex items-center gap-1.5 rounded-md transition-colors ${
+                    activeDropdown === 'tools'
+                      ? 'bg-amber-50 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 font-semibold'
+                      : 'text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-amber-600 dark:hover:text-amber-400'
                   }`}
                 >
-                  <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                  <Sparkles className="w-3.5 h-3.5 text-amber-500" />
                   <span>AI & Tools</span>
                   <ChevronDown className="w-3.5 h-3.5" />
                 </button>
