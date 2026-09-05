@@ -1,17 +1,31 @@
 import React, { useState, useEffect } from 'react';
 import InternshipCard from '@/components/tech/InternshipCard';
 import { dataService, Internship } from '@/services/dataService';
-import { Award, Search, Building2 } from 'lucide-react';
+import { Award, Briefcase, RefreshCw } from 'lucide-react';
+import DataBoundary from '@/components/common/DataBoundary';
+import { CardSkeleton } from '@/components/common/SkeletonLoader';
 
 export default function InternshipsPage() {
   const [internships, setInternships] = useState<Internship[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  async function loadInternships() {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await dataService.getInternships();
+      setInternships(Array.isArray(data) ? data : []);
+    } catch (err: any) {
+      console.error('Failed to load internships:', err);
+      setError('Unable to load internships at this moment. Please check your connection.');
+    } finally {
+      setLoading(false);
+    }
+  }
 
   useEffect(() => {
-    async function load() {
-      const data = await dataService.getInternships();
-      setInternships(data);
-    }
-    load();
+    loadInternships();
   }, []);
 
   return (
@@ -31,29 +45,44 @@ export default function InternshipsPage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {internships.map((internship) => (
-            <InternshipCard
-              key={internship.id}
-              internship={{
-                id: internship.id,
-                title: internship.title,
-                slug: internship.slug,
-                company: internship.company,
-                location: internship.location,
-                workMode: 'Remote',
-                durationMonths: 3,
-                stipendDisplay: internship.stipend,
-                isPpoOffered: true,
-                skillsRequired: internship.skills.join(', '),
-                eligibility: 'College Students / Fresh Graduates',
-                applyDeadline: internship.applyBy,
-                isGovtFellowship: true,
-              }}
-            />
-          ))}
-        </div>
+        <DataBoundary
+          loading={loading}
+          error={error}
+          isEmpty={internships.length === 0}
+          onRetry={loadInternships}
+          loadingComponent={<CardSkeleton count={4} />}
+          emptyTitle="No Active Internships Found"
+          emptyDescription="Currently no internship listings match. Please check back shortly."
+        >
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {internships.map((internship) => (
+              <InternshipCard
+                key={internship.id}
+                internship={{
+                  id: internship.id,
+                  title: internship.title,
+                  slug: internship.slug,
+                  company: internship.company,
+                  location: internship.location,
+                  workMode: 'Remote',
+                  durationMonths: 3,
+                  stipendDisplay: internship.stipend || 'Competitive Stipend',
+                  isPpoOffered: true,
+                  skillsRequired: Array.isArray(internship.skills)
+                    ? internship.skills.join(', ')
+                    : typeof internship.skills === 'string'
+                    ? internship.skills
+                    : '',
+                  eligibility: 'College Students / Fresh Graduates',
+                  applyDeadline: internship.applyBy,
+                  isGovtFellowship: true,
+                }}
+              />
+            ))}
+          </div>
+        </DataBoundary>
       </div>
     </div>
   );
 }
+

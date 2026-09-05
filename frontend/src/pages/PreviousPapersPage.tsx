@@ -1,30 +1,43 @@
 import React, { useState, useEffect } from 'react';
 import { FileCheck2, Download, Search } from 'lucide-react';
 import { dataService } from '@/services/dataService';
+import DataBoundary from '@/components/common/DataBoundary';
+import { CardSkeleton } from '@/components/common/SkeletonLoader';
 
 export default function PreviousPapersPage() {
   const [search, setSearch] = useState('');
-  const [papers, setPapers] = useState<any[]>([
-    { title: 'SSC CGL 2024 Tier 1 Official Shift-Wise Question Papers with Answer Keys', year: '2024', exam: 'SSC CGL', shifts: '39 Shifts', downloadUrl: '#' },
-    { title: 'RRB NTPC 2022 Stage 1 & 2 Original Papers with Solutions', year: '2022', exam: 'RRB NTPC', shifts: '133 Shifts', downloadUrl: '#' },
-    { title: 'UPSC Civil Services Prelims GS Paper 1 & CSAT (2015-2024) 10-Year Solved Papers', year: '2015-2024', exam: 'UPSC CSE', shifts: '10 Years', downloadUrl: '#' },
-    { title: 'IBPS PO Prelims & Mains (2020-2024) Memory-Based Question Papers', year: '2020-2024', exam: 'IBPS PO', shifts: '5 Years', downloadUrl: '#' },
-  ]);
+  const [papers, setPapers] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  async function loadPapers() {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await dataService.getPreviousPapers();
+      if (Array.isArray(data) && data.length > 0) {
+        setPapers(
+          data.map((d: any) => ({
+            title: d.title,
+            year: d.year || '2024-2026',
+            exam: d.exam || 'Govt Exam',
+            shifts: d.fileSize || 'Official PDF',
+            downloadUrl: d.downloadUrl || '#',
+          }))
+        );
+      } else {
+        setPapers([]);
+      }
+    } catch (err: any) {
+      console.error('Failed to load previous papers:', err);
+      setError('Unable to load previous question papers. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  }
 
   useEffect(() => {
-    async function loadDynamicPapers() {
-      const data = await dataService.getPreviousPapers();
-      if (data && data.length > 0) {
-        setPapers(data.map((d: any) => ({
-          title: d.title,
-          year: d.year,
-          exam: d.exam,
-          shifts: d.fileSize || 'Official PDF',
-          downloadUrl: d.downloadUrl || '#',
-        })));
-      }
-    }
-    loadDynamicPapers();
+    loadPapers();
   }, []);
 
   const filtered = papers.filter((p) =>
@@ -49,37 +62,59 @@ export default function PreviousPapersPage() {
           </div>
         </div>
 
-        <div className="space-y-3">
-          {filtered.map((paper, idx) => (
-            <div
-              key={idx}
-              className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 shadow-sm hover:shadow-md hover:border-purple-500 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4"
-            >
-              <div className="space-y-1">
-                <div className="flex items-center gap-2">
-                  <span className="px-2.5 py-0.5 bg-purple-100 dark:bg-purple-900/40 text-purple-800 dark:text-purple-300 text-[10px] font-bold rounded">
-                    {paper.exam}
-                  </span>
-                  <span className="text-xs text-slate-500">{paper.shifts}</span>
-                </div>
-                <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white">
-                  {paper.title}
-                </h3>
-              </div>
-
-              <a
-                href={paper.downloadUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-bold shrink-0 transition-colors shadow"
-              >
-                <Download className="w-3.5 h-3.5" />
-                <span>Download Papers PDF</span>
-              </a>
-            </div>
-          ))}
+        <div className="relative">
+          <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search question papers by exam name (e.g., SSC CGL, RRB NTPC)..."
+            className="w-full pl-10 pr-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 shadow-sm"
+          />
         </div>
+
+        <DataBoundary
+          loading={loading}
+          error={error}
+          isEmpty={filtered.length === 0}
+          onRetry={loadPapers}
+          loadingComponent={<CardSkeleton count={4} />}
+          emptyTitle="No Question Papers Found"
+          emptyDescription="No papers match your search keywords. Try searching for SSC, UPSC, or RRB."
+        >
+          <div className="space-y-3">
+            {filtered.map((paper, idx) => (
+              <div
+                key={idx}
+                className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 shadow-sm hover:shadow-md hover:border-purple-500 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+              >
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <span className="px-2.5 py-0.5 bg-purple-100 dark:bg-purple-900/40 text-purple-800 dark:text-purple-300 text-[10px] font-bold rounded">
+                      {paper.exam}
+                    </span>
+                    <span className="text-xs text-slate-500">{paper.shifts}</span>
+                  </div>
+                  <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white">
+                    {paper.title}
+                  </h3>
+                </div>
+
+                <a
+                  href={paper.downloadUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-bold shrink-0 transition-colors shadow"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  <span>Download Papers PDF</span>
+                </a>
+              </div>
+            ))}
+          </div>
+        </DataBoundary>
       </div>
     </div>
   );
 }
+
