@@ -3,23 +3,39 @@ import TechJobCard from '@/components/tech/TechJobCard';
 import { dataService, TechJob } from '@/services/dataService';
 import { Cpu, Search, Briefcase } from 'lucide-react';
 
+import DataBoundary from '@/components/common/DataBoundary';
+import { CardSkeleton } from '@/components/common/SkeletonLoader';
+import EmptyState from '@/components/common/EmptyState';
+
 export default function TechJobsPage() {
   const [techJobs, setTechJobs] = useState<TechJob[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState('');
 
-  useEffect(() => {
-    async function load() {
+  const loadTechJobs = async () => {
+    setLoading(true);
+    setError(null);
+    try {
       const data = await dataService.getTechJobs();
       setTechJobs(data);
+    } catch (err: any) {
+      console.error('Error loading tech jobs', err);
+      setError(err?.message || 'Failed to load tech careers.');
+    } finally {
+      setLoading(false);
     }
-    load();
+  };
+
+  useEffect(() => {
+    loadTechJobs();
   }, []);
 
   const filtered = techJobs.filter(
     (tj) =>
       tj.title.toLowerCase().includes(search.toLowerCase()) ||
       tj.company.toLowerCase().includes(search.toLowerCase()) ||
-      tj.skills.some((s) => s.toLowerCase().includes(search.toLowerCase()))
+      (tj.skills && tj.skills.some((s) => s.toLowerCase().includes(search.toLowerCase())))
   );
 
   return (
@@ -53,26 +69,36 @@ export default function TechJobsPage() {
           <span className="text-xs font-bold text-slate-500">{filtered.length} Tech Roles</span>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filtered.map((job) => (
-            <TechJobCard
-              key={job.id}
-              job={{
-                id: job.id,
-                title: job.title,
-                slug: job.slug,
-                company: job.company,
-                location: job.location,
-                workMode: 'Hybrid',
-                experienceLevel: job.experience,
-                salaryRange: job.salary,
-                roleCategory: 'Engineering',
-                techStack: job.skills.join(', '),
-                isFeatured: job.featured,
-              }}
-            />
-          ))}
-        </div>
+        <DataBoundary
+          loading={loading}
+          error={error}
+          isEmpty={filtered.length === 0}
+          onRetry={loadTechJobs}
+          loadingComponent={<CardSkeleton count={6} />}
+          emptyTitle="No Tech Roles Found"
+          emptyDescription="No software or tech vacancies match your search term. Try searching for other skills like React, Node.js, or Python."
+        >
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filtered.map((job) => (
+              <TechJobCard
+                key={job.id}
+                job={{
+                  id: job.id,
+                  title: job.title,
+                  slug: job.slug,
+                  company: job.company,
+                  location: job.location,
+                  workMode: 'Hybrid',
+                  experienceLevel: job.experience,
+                  salaryRange: job.salary || (job as any).salaryText || 'Best in Industry',
+                  roleCategory: 'Engineering',
+                  techStack: Array.isArray(job.skills) ? job.skills.join(', ') : 'Software',
+                  isFeatured: job.featured || (job as any).isTrending,
+                }}
+              />
+            ))}
+          </div>
+        </DataBoundary>
       </div>
     </div>
   );

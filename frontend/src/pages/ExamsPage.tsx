@@ -3,16 +3,32 @@ import ExamCard from '@/components/exams/ExamCard';
 import { dataService, Exam } from '@/services/dataService';
 import { GraduationCap, Search } from 'lucide-react';
 
+import DataBoundary from '@/components/common/DataBoundary';
+import { CardSkeleton } from '@/components/common/SkeletonLoader';
+import EmptyState from '@/components/common/EmptyState';
+
 export default function ExamsPage() {
   const [exams, setExams] = useState<Exam[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
 
-  useEffect(() => {
-    async function loadExams() {
+  const loadExams = async () => {
+    setLoading(true);
+    setError(null);
+    try {
       const data = await dataService.getExams();
       setExams(data);
+    } catch (err: any) {
+      console.error('Error loading exams', err);
+      setError(err?.message || 'Failed to load competitive examinations.');
+    } finally {
+      setLoading(false);
     }
+  };
+
+  useEffect(() => {
     loadExams();
   }, []);
 
@@ -22,11 +38,11 @@ export default function ExamsPage() {
     const matchesSearch =
       exam.name.toLowerCase().includes(search.toLowerCase()) ||
       exam.code.toLowerCase().includes(search.toLowerCase()) ||
-      exam.organization.name.toLowerCase().includes(search.toLowerCase());
+      (exam.organization?.name || '').toLowerCase().includes(search.toLowerCase());
 
     const matchesCategory =
       selectedCategory === 'All' ||
-      exam.organization.category.toLowerCase().includes(selectedCategory.toLowerCase());
+      (exam.organization?.category || '').toLowerCase().includes(selectedCategory.toLowerCase());
 
     return matchesSearch && matchesCategory;
   });
@@ -80,23 +96,33 @@ export default function ExamsPage() {
         </div>
 
         {/* Exams Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredExams.map((exam) => (
-            <ExamCard
-              key={exam.id}
-              exam={{
-                id: exam.id,
-                name: exam.name,
-                slug: exam.slug,
-                category: exam.organization.category,
-                organization: exam.organization.name,
-                frequency: exam.frequency || 'Annual',
-                isPopular: exam.isPopular,
-                totalApplicants: '10 Lakh+',
-              }}
-            />
-          ))}
-        </div>
+        <DataBoundary
+          loading={loading}
+          error={error}
+          isEmpty={filteredExams.length === 0}
+          onRetry={loadExams}
+          loadingComponent={<CardSkeleton count={6} />}
+          emptyTitle="No Examinations Found"
+          emptyDescription="No competitive exams match your selected category or keyword. Try changing the filter tab above."
+        >
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredExams.map((exam) => (
+              <ExamCard
+                key={exam.id}
+                exam={{
+                  id: exam.id,
+                  name: exam.name,
+                  slug: exam.slug,
+                  category: exam.organization?.category || 'Central Govt',
+                  organization: exam.organization?.name || 'Exam Commission',
+                  frequency: exam.frequency || 'Annual',
+                  isPopular: exam.isPopular,
+                  totalApplicants: '10 Lakh+',
+                }}
+              />
+            ))}
+          </div>
+        </DataBoundary>
       </div>
     </div>
   );

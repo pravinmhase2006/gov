@@ -101,7 +101,7 @@ export default function JobDetailPage() {
         <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-6 sm:p-8 shadow-sm space-y-6">
           <div className="flex flex-wrap items-center gap-2">
             <span className="px-3 py-1 bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-300 text-xs font-bold rounded-lg">
-              {job.organization.shortName}
+              {job.organization?.shortName || job.organization?.name || 'GOVT'}
             </span>
             <span className="px-3 py-1 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold rounded-lg">
               {job.category || 'Central Govt'}
@@ -122,7 +122,7 @@ export default function JobDetailPage() {
             <div>
               <span className="text-[11px] text-slate-500 font-medium block">Total Vacancies</span>
               <span className="text-base font-black text-slate-900 dark:text-white">
-                {job.totalVacancies.toLocaleString('en-IN')} Posts
+                {(job.totalVacancies || 0).toLocaleString('en-IN')} Posts
               </span>
             </div>
             <div>
@@ -134,7 +134,7 @@ export default function JobDetailPage() {
             <div>
               <span className="text-[11px] text-slate-500 font-medium block">Age Limit</span>
               <span className="text-base font-black text-slate-900 dark:text-white">
-                {job.ageLimitMin} - {job.ageLimitMax} Years
+                {job.ageLimitMin || 18} - {job.ageLimitMax || 35} Years
               </span>
             </div>
             <div>

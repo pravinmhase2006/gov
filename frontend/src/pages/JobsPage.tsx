@@ -4,47 +4,67 @@ import JobCard from '@/components/jobs/JobCard';
 import JobFilterSidebar from '@/components/jobs/JobFilterSidebar';
 import { dataService, Job } from '@/services/dataService';
 import { Briefcase, Search, Filter } from 'lucide-react';
+import DataBoundary from '@/components/common/DataBoundary';
+import { CardSkeleton } from '@/components/common/SkeletonLoader';
+import EmptyState from '@/components/common/EmptyState';
+import ErrorState from '@/components/common/ErrorState';
 
 export default function JobsPage() {
   const [searchParams] = useSearchParams();
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState(searchParams.get('q') || '');
 
   const categoryFilter = searchParams.get('category') || 'all';
   const qualificationFilter = searchParams.get('qualification') || 'all';
   const stateFilter = searchParams.get('state') || 'all';
 
-  useEffect(() => {
-    async function loadJobs() {
-      setLoading(true);
+  const loadJobs = async () => {
+    setLoading(true);
+    setError(null);
+    try {
       const data = await dataService.getJobs();
       setJobs(data);
+    } catch (err: any) {
+      console.error('Error loading jobs', err);
+      setError(err?.message || 'Failed to load government job notifications.');
+    } finally {
       setLoading(false);
     }
+  };
+
+  useEffect(() => {
     loadJobs();
   }, []);
 
   const filteredJobs = jobs.filter((job) => {
     const q = searchTerm.toLowerCase();
+    const orgName = (job.organization?.name || (job as any).organization || '').toLowerCase();
+    const orgCategory = (job.organization?.category || job.category || '').toLowerCase();
+    const jobTitle = (job.title || '').toLowerCase();
+    const postName = (job.postName || '').toLowerCase();
+    const qual = (job.qualification || '').toLowerCase();
+    const jobState = (job.state || 'All India').toLowerCase();
+
     const matchesSearch =
       !q ||
-      job.title.toLowerCase().includes(q) ||
-      job.organization.name.toLowerCase().includes(q) ||
-      job.postName.toLowerCase().includes(q);
+      jobTitle.includes(q) ||
+      orgName.includes(q) ||
+      postName.includes(q);
 
     const matchesCategory =
       categoryFilter === 'all' ||
-      job.category?.toLowerCase() === categoryFilter.toLowerCase() ||
-      job.organization.category.toLowerCase().includes(categoryFilter.toLowerCase());
+      orgCategory.includes(categoryFilter.toLowerCase()) ||
+      (job.category && job.category.toLowerCase().includes(categoryFilter.toLowerCase()));
 
     const matchesQualification =
       qualificationFilter === 'all' ||
       qualificationFilter === 'All Qualifications' ||
-      job.qualification.toLowerCase().includes(qualificationFilter.toLowerCase());
+      qual.includes(qualificationFilter.toLowerCase());
 
     const matchesState =
-      stateFilter === 'all' || job.state?.toLowerCase() === stateFilter.toLowerCase();
+      stateFilter === 'all' || jobState.includes(stateFilter.toLowerCase());
 
     return matchesSearch && matchesCategory && matchesQualification && matchesState;
   });
@@ -110,16 +130,15 @@ export default function JobsPage() {
               </span>
             </div>
 
-            {loading ? (
-              <div className="text-center py-12 text-slate-500 font-medium animate-pulse">
-                Loading job notifications...
-              </div>
-            ) : filteredJobs.length === 0 ? (
-              <div className="text-center py-12 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-8">
-                <p className="text-base font-bold text-slate-700 dark:text-slate-300">No jobs matched your filters.</p>
-                <p className="text-xs text-slate-500 mt-1">Try resetting the filter criteria or search keyword.</p>
-              </div>
-            ) : (
+            <DataBoundary
+              loading={loading}
+              error={error}
+              isEmpty={filteredJobs.length === 0}
+              onRetry={loadJobs}
+              loadingComponent={<CardSkeleton count={4} />}
+              emptyTitle="No Government Jobs Matched"
+              emptyDescription="No vacancies currently match your selected filters. Try broadening your qualification, state, or category search."
+            >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {filteredJobs.map((job) => (
                   <JobCard
@@ -142,7 +161,7 @@ export default function JobsPage() {
                   />
                 ))}
               </div>
-            )}
+            </DataBoundary>
           </div>
         </div>
       </div>

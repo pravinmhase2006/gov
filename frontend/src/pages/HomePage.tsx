@@ -8,6 +8,10 @@ import AdBanner from '@/components/ads/AdBanner';
 import QuestionOfTheDay from '@/components/common/QuestionOfTheDay';
 import JobAlertModal from '@/components/common/JobAlertModal';
 import AnimatedCounter from '@/components/common/AnimatedCounter';
+import DataBoundary from '@/components/common/DataBoundary';
+import { CardSkeleton, MetricsSkeleton, ListSkeleton } from '@/components/common/SkeletonLoader';
+import EmptyState from '@/components/common/EmptyState';
+import ErrorState from '@/components/common/ErrorState';
 import {
   dataService,
   Job,
@@ -65,43 +69,48 @@ export default function HomePage() {
     totalTestAttempts: 42950,
   });
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const loadData = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const [
+        jobsData,
+        examsData,
+        techJobsData,
+        resultsData,
+        admitCardsData,
+        answerKeysData,
+        caData,
+        statsData,
+      ] = await Promise.all([
+        dataService.getJobs(),
+        dataService.getExams(),
+        dataService.getTechJobs(),
+        dataService.getResults(),
+        dataService.getAdmitCards(),
+        dataService.getAnswerKeys(),
+        dataService.getCurrentAffairs(),
+        dataService.getStats(),
+      ]);
+      setJobs(jobsData);
+      setExams(examsData);
+      setTechJobs(techJobsData);
+      setResults(resultsData);
+      setAdmitCards(admitCardsData);
+      setAnswerKeys(answerKeysData);
+      setCurrentAffairs(caData);
+      if (statsData) setStats(statsData);
+    } catch (err: any) {
+      console.error('Error loading homepage data', err);
+      setError(err?.message || 'Failed to connect to backend server. Please retry.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    async function loadData() {
-      try {
-        const [
-          jobsData,
-          examsData,
-          techJobsData,
-          resultsData,
-          admitCardsData,
-          answerKeysData,
-          caData,
-          statsData,
-        ] = await Promise.all([
-          dataService.getJobs(),
-          dataService.getExams(),
-          dataService.getTechJobs(),
-          dataService.getResults(),
-          dataService.getAdmitCards(),
-          dataService.getAnswerKeys(),
-          dataService.getCurrentAffairs(),
-          dataService.getStats(),
-        ]);
-        setJobs(jobsData);
-        setExams(examsData);
-        setTechJobs(techJobsData);
-        setResults(resultsData);
-        setAdmitCards(admitCardsData);
-        setAnswerKeys(answerKeysData);
-        setCurrentAffairs(caData);
-        if (statsData) setStats(statsData);
-      } catch (err) {
-        console.error('Error loading homepage data', err);
-      } finally {
-        setLoading(false);
-      }
-    }
     loadData();
   }, []);
 
@@ -369,28 +378,38 @@ export default function HomePage() {
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {featuredJobs.map((job) => (
-            <JobCard
-              key={job.id}
-              job={{
-                id: job.id,
-                title: job.title,
-                slug: job.slug,
-                organization: job.organization.name,
-                organizationCode: job.organization.shortName,
-                totalVacancies: job.totalVacancies,
-                qualification: job.qualification,
-                salary: job.salaryText || 'As per 7th CPC',
-                state: job.state || 'All India',
-                lastDate: job.lastDate,
-                isFeatured: job.isFeatured,
-                isTrending: job.isTrending,
-                category: job.category || 'Central Govt',
-              }}
-            />
-          ))}
-        </div>
+        <DataBoundary
+          loading={loading}
+          error={error}
+          isEmpty={featuredJobs.length === 0}
+          onRetry={loadData}
+          loadingComponent={<CardSkeleton count={3} />}
+          emptyTitle="No Featured Vacancies Found"
+          emptyDescription="Active notifications will appear here once updated by the central recruiting boards."
+        >
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {featuredJobs.map((job) => (
+              <JobCard
+                key={job.id}
+                job={{
+                  id: job.id,
+                  title: job.title,
+                  slug: job.slug,
+                  organization: job.organization.name,
+                  organizationCode: job.organization.shortName,
+                  totalVacancies: job.totalVacancies,
+                  qualification: job.qualification,
+                  salary: job.salaryText || 'As per 7th CPC',
+                  state: job.state || 'All India',
+                  lastDate: job.lastDate,
+                  isFeatured: job.isFeatured,
+                  isTrending: job.isTrending,
+                  category: job.category || 'Central Govt',
+                }}
+              />
+            ))}
+          </div>
+        </DataBoundary>
       </section>
 
       {/* 5. INTERACTIVE ASPIRANT UTILITIES SUITE */}
