@@ -130,8 +130,8 @@ export default function AspirantAIAssistant() {
       {/* Floating Trigger Button */}
       <button
         onClick={() => setIsOpen(true)}
-        className={`fixed bottom-6 right-6 z-50 flex items-center gap-2.5 px-4 py-3 bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 text-white font-bold text-sm rounded-full shadow-2xl hover:shadow-blue-500/40 hover:scale-105 active:scale-95 transition-all ${
-          isOpen ? 'hidden' : 'flex animate-bounce'
+        className={`fixed bottom-20 md:bottom-6 right-4 sm:right-6 z-40 flex items-center gap-2.5 px-4 py-3 bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 text-white font-bold text-xs sm:text-sm rounded-full shadow-2xl hover:shadow-blue-500/40 hover:scale-105 active:scale-95 transition-all ${
+          isOpen ? 'hidden' : 'flex'
         }`}
         aria-label="Open AI Assistant"
       >
@@ -147,7 +147,7 @@ export default function AspirantAIAssistant() {
 
       {/* Interactive Modal / Drawer */}
       {isOpen && (
-        <div className="fixed bottom-6 right-4 sm:right-6 z-50 w-[92vw] sm:w-[420px] h-[580px] bg-white rounded-3xl shadow-2xl border border-slate-200 flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-6 duration-200">
+        <div className="fixed bottom-20 md:bottom-6 right-2 sm:right-6 z-50 w-[96vw] sm:w-[420px] h-[540px] sm:h-[580px] max-h-[80vh] bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-6 duration-200">
           
           {/* Header */}
           <div className="bg-gradient-to-r from-slate-900 via-blue-950 to-indigo-950 text-white p-4 flex items-center justify-between border-b border-blue-800/50">
@@ -176,12 +176,12 @@ export default function AspirantAIAssistant() {
           </div>
 
           {/* Quick Prompts Bar */}
-          <div className="bg-slate-50 border-b border-slate-100 p-2 overflow-x-auto flex gap-1.5 no-scrollbar text-xs">
+          <div className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-100 dark:border-slate-800 p-2 overflow-x-auto flex gap-1.5 no-scrollbar text-xs">
             {QUICK_PROMPTS.slice(0, 3).map((prompt, idx) => (
               <button
                 key={idx}
                 onClick={() => handleSend(prompt)}
-                className="whitespace-nowrap bg-white border border-slate-200 hover:border-blue-400 hover:text-blue-600 px-2.5 py-1 rounded-lg text-[11px] font-medium text-slate-700 transition-colors shadow-xs"
+                className="whitespace-nowrap bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-blue-400 dark:hover:border-blue-500 hover:text-blue-600 dark:hover:text-blue-400 px-2.5 py-1 rounded-lg text-[11px] font-medium text-slate-700 dark:text-slate-300 transition-colors shadow-xs"
               >
                 {prompt}
               </button>
@@ -189,28 +189,28 @@ export default function AspirantAIAssistant() {
           </div>
 
           {/* Chat Messages */}
-          <div className="flex-1 p-4 overflow-y-auto space-y-4 text-xs bg-slate-50/50">
+          <div className="flex-1 p-4 overflow-y-auto space-y-4 text-xs bg-slate-50/50 dark:bg-slate-950/40">
             {messages.map((m) => (
               <div
                 key={m.id}
                 className={`flex gap-2.5 ${m.sender === 'user' ? 'justify-end' : 'justify-start'}`}
               >
                 {m.sender === 'bot' && (
-                  <div className="w-7 h-7 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center font-bold shrink-0 mt-0.5">
+                  <div className="w-7 h-7 rounded-xl bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-400 flex items-center justify-center font-bold shrink-0 mt-0.5">
                     🤖
                   </div>
                 )}
                 <div
-                  className={`max-w-[82%] rounded-2xl p-3.5 leading-relaxed shadow-xs ${
+                  className={`max-w-[84%] rounded-2xl p-3.5 leading-relaxed shadow-xs ${
                     m.sender === 'user'
                       ? 'bg-blue-600 text-white rounded-tr-xs'
-                      : 'bg-white text-slate-800 border border-slate-200 rounded-tl-xs whitespace-pre-line'
+                      : 'bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 rounded-tl-xs whitespace-pre-line'
                   }`}
                 >
                   <p>{m.text}</p>
                   <span
                     className={`block text-[9px] mt-1 text-right ${
-                      m.sender === 'user' ? 'text-blue-200' : 'text-slate-400'
+                      m.sender === 'user' ? 'text-blue-200' : 'text-slate-400 dark:text-slate-500'
                     }`}
                   >
                     {m.timestamp}
@@ -224,7 +224,7 @@ export default function AspirantAIAssistant() {
                 <div className="w-2 h-2 rounded-full bg-blue-500 animate-bounce"></div>
                 <div className="w-2 h-2 rounded-full bg-blue-500 animate-bounce [animation-delay:0.2s]"></div>
                 <div className="w-2 h-2 rounded-full bg-blue-500 animate-bounce [animation-delay:0.4s]"></div>
-                <span className="text-[11px] font-medium text-slate-500">Aspirant AI is thinking...</span>
+                <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400">Aspirant AI is thinking...</span>
               </div>
             )}
             <div ref={messagesEndRef} />
@@ -236,19 +236,19 @@ export default function AspirantAIAssistant() {
               e.preventDefault();
               handleSend();
             }}
-            className="p-3 bg-white border-t border-slate-100 flex items-center gap-2"
+            className="p-3 bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800 flex items-center gap-2"
           >
             <input
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Ask about Govt jobs, syllabus, tricks..."
-              className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white"
+              className="flex-1 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2 text-xs text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white dark:focus:bg-slate-800"
             />
             <button
               type="submit"
               disabled={!input.trim()}
-              className="w-9 h-9 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:opacity-40 text-white flex items-center justify-center transition-colors shadow-sm"
+              className="w-9 h-9 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:opacity-40 text-white flex items-center justify-center transition-colors shadow-sm shrink-0"
               aria-label="Send"
             >
               <Send className="w-4 h-4" />
