@@ -26,7 +26,6 @@ import {
   Zap,
   Wrench,
   HelpCircle,
-  FileCode2
 } from 'lucide-react';
 
 import ThemeToggle from '@/components/common/ThemeToggle';
@@ -562,20 +561,6 @@ export default function Navbar({ initialUser = null }: NavbarProps) {
                 )}
               </li>
             </div>
-
-            {/* Right: API Docs Link */}
-            <li>
-              <a
-                href="https://gov-ly37.onrender.com/docs"
-                target="_blank"
-                rel="noreferrer"
-                className="px-3 py-1.5 rounded-md bg-slate-800 hover:bg-slate-700 text-xs text-blue-400 hover:text-blue-300 flex items-center gap-1.5 border border-slate-700 transition-colors"
-              >
-                <FileCode2 className="w-3.5 h-3.5" />
-                <span>Swagger API Docs</span>
-              </a>
-            </li>
-
           </ul>
         </div>
       </nav>
@@ -670,17 +655,6 @@ export default function Navbar({ initialUser = null }: NavbarProps) {
                 📖 Study Notes
               </Link>
             </div>
-          </div>
-
-          <div className="pt-2 border-t border-slate-200 dark:border-slate-800">
-            <a
-              href="https://gov-ly37.onrender.com/docs"
-              target="_blank"
-              rel="noreferrer"
-              className="w-full p-2.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-blue-600 dark:text-blue-400 text-xs font-semibold flex items-center justify-center gap-2"
-            >
-              <FileCode2 className="w-4 h-4" /> Open Swagger API Documentation
-            </a>
           </div>
         </div>
       )}

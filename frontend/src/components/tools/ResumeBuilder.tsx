@@ -197,24 +197,24 @@ export default function ResumeBuilder() {
 
         {/* Right Column: Live Printable Document Preview */}
         <div className="lg:col-span-7">
-          <div className="bg-white rounded-3xl border-2 border-slate-300 shadow-xl p-8 sm:p-12 print:border-none print:shadow-none print:p-0 print:m-0 min-h-[900px]">
+          <div className="bg-white rounded-3xl border-2 border-slate-300 shadow-xl p-4 sm:p-8 md:p-12 print:border-none print:shadow-none print:p-0 print:m-0 min-h-[900px] break-words overflow-hidden">
             
             {/* TEMPLATE A: TECH SDE RESUME */}
             {template === 'TECH_SDE' && (
               <div className="space-y-6 text-slate-800 font-sans">
                 {/* Header */}
                 <div className="border-b-2 border-blue-600 pb-4 text-center space-y-1">
-                  <h2 className="text-2xl font-black tracking-tight text-slate-900 uppercase">
+                  <h2 className="text-xl sm:text-2xl font-black tracking-tight text-slate-900 uppercase">
                     {formData.fullName}
                   </h2>
-                  <div className="flex flex-wrap items-center justify-center gap-3 text-xs text-slate-600">
+                  <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 text-xs text-slate-600">
                     <span>{formData.email}</span>
                     <span>•</span>
                     <span>{formData.phone}</span>
                     <span>•</span>
                     <span>{formData.location}</span>
                   </div>
-                  <div className="flex items-center justify-center gap-3 text-[11px] text-blue-600 font-semibold mt-1">
+                  <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 text-[11px] text-blue-600 font-semibold mt-1">
                     <span>{formData.githubOrWebsite}</span>
                     <span>•</span>
                     <span>{formData.linkedin}</span>
@@ -236,7 +236,7 @@ export default function ResumeBuilder() {
                   </h3>
                   {formData.experience.map((exp, idx) => (
                     <div key={idx} className="space-y-1 text-xs">
-                      <div className="flex items-center justify-between font-bold text-slate-900">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between font-bold text-slate-900 gap-1">
                         <span>{exp.role} — <span className="text-blue-700">{exp.company}</span></span>
                         <span className="text-[11px] text-slate-500 font-semibold">{exp.duration}</span>
                       </div>
@@ -252,7 +252,7 @@ export default function ResumeBuilder() {
                   </h3>
                   {formData.projects.map((proj, idx) => (
                     <div key={idx} className="space-y-1 text-xs">
-                      <div className="flex items-center justify-between font-bold text-slate-900">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between font-bold text-slate-900 gap-1">
                         <span>{proj.title}</span>
                         <span className="text-[10px] text-slate-500 font-mono">{proj.tech}</span>
                       </div>
@@ -261,33 +261,33 @@ export default function ResumeBuilder() {
                   ))}
                 </div>
 
-                {/* Skills */}
-                <div className="space-y-1.5">
-                  <h3 className="text-xs font-black uppercase tracking-wider text-blue-900 border-b border-slate-200 pb-1">
-                    Technical Skills &amp; Tools
-                  </h3>
-                  <p className="text-xs text-slate-800 font-medium leading-relaxed">{formData.skills}</p>
-                </div>
-
                 {/* Education */}
                 <div className="space-y-2">
                   <h3 className="text-xs font-black uppercase tracking-wider text-blue-900 border-b border-slate-200 pb-1">
-                    Education &amp; Credentials
+                    Education
                   </h3>
-                  <div className="space-y-1.5 text-xs">
-                    {formData.education.map((edu, idx) => (
-                      <div key={idx} className="flex items-center justify-between">
-                        <div>
-                          <span className="font-bold text-slate-900">{edu.degree}</span>
-                          <span className="text-slate-500 text-xs block">{edu.inst}</span>
-                        </div>
-                        <div className="text-right">
-                          <span className="font-bold text-blue-600">{edu.score}</span>
-                          <span className="text-slate-400 text-[10px] block">{edu.year}</span>
-                        </div>
+                  {formData.education.map((edu, idx) => (
+                    <div key={idx} className="flex flex-col sm:flex-row sm:items-center justify-between text-xs text-slate-800 gap-1">
+                      <div>
+                        <span className="font-bold text-slate-900">{edu.degree}</span>
+                        <span className="text-slate-500"> — {edu.inst}</span>
                       </div>
-                    ))}
-                  </div>
+                      <div className="text-left sm:text-right text-[11px]">
+                        <span className="font-bold text-blue-800">{edu.score}</span>
+                        <span className="text-slate-400"> ({edu.year})</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Technical Skills */}
+                <div className="space-y-1.5">
+                  <h3 className="text-xs font-black uppercase tracking-wider text-blue-900 border-b border-slate-200 pb-1">
+                    Skills &amp; Technologies
+                  </h3>
+                  <p className="text-xs text-slate-700 leading-relaxed font-mono bg-slate-50 p-3 rounded-xl border border-slate-100">
+                    {formData.skills}
+                  </p>
                 </div>
               </div>
             )}
@@ -304,14 +304,14 @@ export default function ResumeBuilder() {
                   </p>
                 </div>
 
-                <div className="grid grid-cols-2 gap-y-3 text-xs border border-slate-300 p-4 rounded-xl">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-3 text-xs border border-slate-300 p-4 rounded-xl">
                   <div><strong>1. Full Name:</strong> {formData.fullName}</div>
                   <div><strong>2. Father&apos;s Name:</strong> {formData.fatherName}</div>
                   <div><strong>3. Date of Birth:</strong> {formData.dob}</div>
                   <div><strong>4. Category / Quota:</strong> {formData.category}</div>
                   <div><strong>5. Mobile Contact:</strong> {formData.phone}</div>
                   <div><strong>6. Email Address:</strong> {formData.email}</div>
-                  <div className="col-span-2"><strong>7. Address for Correspondence:</strong> {formData.location}</div>
+                  <div className="sm:col-span-2"><strong>7. Address for Correspondence:</strong> {formData.location}</div>
                 </div>
 
                 {/* Academic Record Table */}
@@ -319,26 +319,28 @@ export default function ResumeBuilder() {
                   <h3 className="text-xs font-bold uppercase tracking-wide">
                     8. Educational &amp; Professional Qualifications:
                   </h3>
-                  <table className="w-full border-collapse border border-slate-300 text-xs text-left">
-                    <thead className="bg-slate-100 font-bold border-b border-slate-300">
-                      <tr>
-                        <th className="border border-slate-300 p-2">Examination Passed</th>
-                        <th className="border border-slate-300 p-2">Board / University</th>
-                        <th className="border border-slate-300 p-2">Year</th>
-                        <th className="border border-slate-300 p-2">% / CGPA</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {formData.education.map((edu, idx) => (
-                        <tr key={idx}>
-                          <td className="border border-slate-300 p-2">{edu.degree}</td>
-                          <td className="border border-slate-300 p-2">{edu.inst}</td>
-                          <td className="border border-slate-300 p-2">{edu.year}</td>
-                          <td className="border border-slate-300 p-2 font-bold">{edu.score}</td>
+                  <div className="table-responsive">
+                    <table className="w-full min-w-[450px] border-collapse border border-slate-300 text-xs text-left">
+                      <thead className="bg-slate-100 font-bold border-b border-slate-300">
+                        <tr>
+                          <th className="border border-slate-300 p-2">Examination Passed</th>
+                          <th className="border border-slate-300 p-2">Board / University</th>
+                          <th className="border border-slate-300 p-2">Year</th>
+                          <th className="border border-slate-300 p-2">% / CGPA</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                      </thead>
+                      <tbody>
+                        {formData.education.map((edu, idx) => (
+                          <tr key={idx}>
+                            <td className="border border-slate-300 p-2">{edu.degree}</td>
+                            <td className="border border-slate-300 p-2">{edu.inst}</td>
+                            <td className="border border-slate-300 p-2">{edu.year}</td>
+                            <td className="border border-slate-300 p-2 font-bold">{edu.score}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
 
                 {/* Declaration */}

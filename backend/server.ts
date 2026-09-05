@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import authRoutes from './routes/authRoutes.js';
 import jobRoutes from './routes/jobRoutes.js';
 import examRoutes from './routes/examRoutes.js';
+import testRoutes from './routes/testRoutes.js';
 import docsRoutes from './routes/docsRoutes.js';
 
 dotenv.config();
@@ -34,6 +35,7 @@ app.use('/api-docs', docsRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/jobs', jobRoutes);
 app.use('/api/exams', examRoutes);
+app.use('/api/tests', testRoutes);
 
 // Global Error Handler
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {

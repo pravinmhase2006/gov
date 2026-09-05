@@ -274,12 +274,12 @@ export default function TypingTest() {
             </div>
 
             {/* Verification Footer */}
-            <div className="pt-6 border-t border-slate-200 flex items-center justify-between text-xs text-slate-500">
+            <div className="pt-6 border-t border-slate-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-xs text-slate-500">
               <div>
                 <p className="font-bold text-slate-800">Certificate ID: TYP-{Date.now().toString().slice(-8)}</p>
                 <p>Date of Evaluation: {new Date().toLocaleDateString('en-IN')}</p>
               </div>
-              <div className="text-right">
+              <div className="text-left sm:text-right">
                 <div className="border-b border-slate-500 w-36 mb-1"></div>
                 <span className="font-bold">Authorized Examiner</span>
               </div>

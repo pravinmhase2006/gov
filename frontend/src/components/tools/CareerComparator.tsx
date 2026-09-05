@@ -133,86 +133,88 @@ export default function CareerComparator() {
 
       {/* Side-by-Side Matrix Table */}
       <div className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm">
-        <table className="w-full text-xs text-left border-collapse">
-          <thead>
-            <tr className="bg-slate-100 text-slate-900 border-b border-slate-200">
-              <th className="p-4 sm:p-5 w-1/4 font-black uppercase text-slate-500">Comparison Parameter</th>
-              <th className="p-4 sm:p-5 w-[37.5%] font-black text-sm text-blue-900 bg-blue-50/50">{left.name}</th>
-              <th className="p-4 sm:p-5 w-[37.5%] font-black text-sm text-indigo-900 bg-indigo-50/50">{right.name}</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-100 text-slate-800">
-            
-            <tr>
-              <td className="p-4 font-bold text-slate-500 bg-slate-50/50">Category &amp; Cadre</td>
-              <td className="p-4 font-semibold text-slate-900">{left.category}</td>
-              <td className="p-4 font-semibold text-slate-900">{right.category}</td>
-            </tr>
+        <div className="table-responsive">
+          <table className="w-full min-w-[550px] text-xs text-left border-collapse">
+            <thead>
+              <tr className="bg-slate-100 text-slate-900 border-b border-slate-200">
+                <th className="p-4 sm:p-5 w-1/4 font-black uppercase text-slate-500">Comparison Parameter</th>
+                <th className="p-4 sm:p-5 w-[37.5%] font-black text-sm text-blue-900 bg-blue-50/50">{left.name}</th>
+                <th className="p-4 sm:p-5 w-[37.5%] font-black text-sm text-indigo-900 bg-indigo-50/50">{right.name}</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100 text-slate-800">
+              
+              <tr>
+                <td className="p-4 font-bold text-slate-500 bg-slate-50/50">Category &amp; Cadre</td>
+                <td className="p-4 font-semibold text-slate-900">{left.category}</td>
+                <td className="p-4 font-semibold text-slate-900">{right.category}</td>
+              </tr>
 
-            <tr className="bg-amber-50/30">
-              <td className="p-4 font-bold text-amber-900 flex items-center gap-1.5">
-                <IndianRupee className="w-3.5 h-3.5" /> In-Hand Monthly Salary
-              </td>
-              <td className="p-4 font-black text-sm text-amber-900">{left.inHandSalary}</td>
-              <td className="p-4 font-black text-sm text-amber-900">{right.inHandSalary}</td>
-            </tr>
+              <tr className="bg-amber-50/30">
+                <td className="p-4 font-bold text-amber-900 flex items-center gap-1.5">
+                  <IndianRupee className="w-3.5 h-3.5" /> In-Hand Monthly Salary
+                </td>
+                <td className="p-4 font-black text-sm text-amber-900">{left.inHandSalary}</td>
+                <td className="p-4 font-black text-sm text-amber-900">{right.inHandSalary}</td>
+              </tr>
 
-            <tr>
-              <td className="p-4 font-bold text-slate-500 bg-slate-50/50">Work-Life Balance</td>
-              <td className="p-4 font-medium">{left.workLifeBalance}</td>
-              <td className="p-4 font-medium">{right.workLifeBalance}</td>
-            </tr>
+              <tr>
+                <td className="p-4 font-bold text-slate-500 bg-slate-50/50">Work-Life Balance</td>
+                <td className="p-4 font-medium">{left.workLifeBalance}</td>
+                <td className="p-4 font-medium">{right.workLifeBalance}</td>
+              </tr>
 
-            <tr>
-              <td className="p-4 font-bold text-slate-500 bg-slate-50/50">Promotion Velocity</td>
-              <td className="p-4 font-medium">{left.promotionSpeed}</td>
-              <td className="p-4 font-medium">{right.promotionSpeed}</td>
-            </tr>
+              <tr>
+                <td className="p-4 font-bold text-slate-500 bg-slate-50/50">Promotion Velocity</td>
+                <td className="p-4 font-medium">{left.promotionSpeed}</td>
+                <td className="p-4 font-medium">{right.promotionSpeed}</td>
+              </tr>
 
-            <tr>
-              <td className="p-4 font-bold text-slate-500 bg-slate-50/50">Job Security Index</td>
-              <td className="p-4 font-medium">{left.jobSecurity}</td>
-              <td className="p-4 font-medium">{right.jobSecurity}</td>
-            </tr>
+              <tr>
+                <td className="p-4 font-bold text-slate-500 bg-slate-50/50">Job Security Index</td>
+                <td className="p-4 font-medium">{left.jobSecurity}</td>
+                <td className="p-4 font-medium">{right.jobSecurity}</td>
+              </tr>
 
-            <tr>
-              <td className="p-4 font-bold text-slate-500 bg-slate-50/50">Exam / Interview Difficulty</td>
-              <td className="p-4 font-medium">{left.examDifficulty}</td>
-              <td className="p-4 font-medium">{right.examDifficulty}</td>
-            </tr>
+              <tr>
+                <td className="p-4 font-bold text-slate-500 bg-slate-50/50">Exam / Interview Difficulty</td>
+                <td className="p-4 font-medium">{left.examDifficulty}</td>
+                <td className="p-4 font-medium">{right.examDifficulty}</td>
+              </tr>
 
-            <tr>
-              <td className="p-4 font-bold text-slate-500 bg-slate-50/50">Selection Process</td>
-              <td className="p-4 font-medium text-slate-700">{left.selectionStages}</td>
-              <td className="p-4 font-medium text-slate-700">{right.selectionStages}</td>
-            </tr>
+              <tr>
+                <td className="p-4 font-bold text-slate-500 bg-slate-50/50">Selection Process</td>
+                <td className="p-4 font-medium text-slate-700">{left.selectionStages}</td>
+                <td className="p-4 font-medium text-slate-700">{right.selectionStages}</td>
+              </tr>
 
-            <tr>
-              <td className="p-4 font-bold text-slate-500 bg-slate-50/50">Top Allowances &amp; Perks</td>
-              <td className="p-4">
-                <ul className="space-y-1">
-                  {left.topPerks.map((p, i) => (
-                    <li key={i} className="flex items-center gap-1.5 text-slate-700">
-                      <Check className="w-3 h-3 text-emerald-600" />
-                      <span>{p}</span>
-                    </li>
-                  ))}
-                </ul>
-              </td>
-              <td className="p-4">
-                <ul className="space-y-1">
-                  {right.topPerks.map((p, i) => (
-                    <li key={i} className="flex items-center gap-1.5 text-slate-700">
-                      <Check className="w-3 h-3 text-emerald-600" />
-                      <span>{p}</span>
-                    </li>
-                  ))}
-                </ul>
-              </td>
-            </tr>
+              <tr>
+                <td className="p-4 font-bold text-slate-500 bg-slate-50/50">Top Allowances &amp; Perks</td>
+                <td className="p-4">
+                  <ul className="space-y-1">
+                    {left.topPerks.map((p, i) => (
+                      <li key={i} className="flex items-center gap-1.5 text-slate-700">
+                        <Check className="w-3 h-3 text-emerald-600" />
+                        <span>{p}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </td>
+                <td className="p-4">
+                  <ul className="space-y-1">
+                    {right.topPerks.map((p, i) => (
+                      <li key={i} className="flex items-center gap-1.5 text-slate-700">
+                        <Check className="w-3 h-3 text-emerald-600" />
+                        <span>{p}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </td>
+              </tr>
 
-          </tbody>
-        </table>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );

@@ -1,3 +1,5 @@
+import { apiRequest } from './api';
+
 export interface Organization {
   id: string;
   name: string;
@@ -6,6 +8,7 @@ export interface Organization {
   logoUrl?: string | null;
   officialWebsite?: string | null;
 }
+
 
 export interface Job {
   id: string;
@@ -779,18 +782,47 @@ export const MOCK_CURRENT_AFFAIRS: CurrentAffair[] = [
 // Async Data API Layer
 export const dataService = {
   async getJobs(): Promise<Job[]> {
+    try {
+      const data = await apiRequest<Job[]>('/jobs');
+      if (Array.isArray(data) && data.length > 0) return data;
+    } catch {
+      // Fallback to local dataset if API is offline
+    }
     return MOCK_JOBS;
   },
   async getJobBySlug(slug: string): Promise<Job | undefined> {
+    try {
+      const data = await apiRequest<Job>(`/jobs/${slug}`);
+      if (data) return data;
+    } catch {
+      // Fallback
+    }
     return MOCK_JOBS.find((j) => j.slug === slug);
   },
   async getFeaturedJobs(): Promise<Job[]> {
-    return MOCK_JOBS.filter((j) => j.isFeatured);
+    try {
+      const jobs = await this.getJobs();
+      return jobs.filter((j) => j.isFeatured);
+    } catch {
+      return MOCK_JOBS.filter((j) => j.isFeatured);
+    }
   },
   async getExams(): Promise<Exam[]> {
+    try {
+      const data = await apiRequest<Exam[]>('/exams');
+      if (Array.isArray(data) && data.length > 0) return data;
+    } catch {
+      // Fallback
+    }
     return MOCK_EXAMS;
   },
   async getExamBySlug(slug: string): Promise<Exam | undefined> {
+    try {
+      const data = await apiRequest<Exam>(`/exams/${slug}`);
+      if (data) return data;
+    } catch {
+      // Fallback
+    }
     return MOCK_EXAMS.find((e) => e.slug === slug);
   },
   async getTechJobs(): Promise<TechJob[]> {
@@ -803,10 +835,33 @@ export const dataService = {
     return MOCK_INTERNSHIPS;
   },
   async getMockTests(): Promise<MockTest[]> {
+    try {
+      const data = await apiRequest<MockTest[]>('/tests');
+      if (Array.isArray(data) && data.length > 0) return data;
+    } catch {
+      // Fallback
+    }
     return MOCK_TESTS;
   },
   async getMockTestBySlug(slug: string): Promise<MockTest | undefined> {
+    try {
+      const data = await apiRequest<MockTest>(`/tests/${slug}`);
+      if (data) return data;
+    } catch {
+      // Fallback
+    }
     return MOCK_TESTS.find((t) => t.slug === slug);
+  },
+  async submitMockTest(slug: string, submission: { answers: Record<string, string>; timeTakenSeconds: number; candidateName?: string }) {
+    try {
+      return await apiRequest<any>(`/tests/${slug}/submit`, {
+        method: 'POST',
+        body: JSON.stringify(submission),
+      });
+    } catch (e) {
+      console.warn('Backend test submit failed, using client calculations', e);
+      return null;
+    }
   },
   async getResults(): Promise<ResultItem[]> {
     return MOCK_RESULTS;
@@ -822,11 +877,12 @@ export const dataService = {
   },
   async searchAll(query: string) {
     const q = query.toLowerCase();
-    const jobs = MOCK_JOBS.filter(
-      (j) => j.title.toLowerCase().includes(q) || j.organization.name.toLowerCase().includes(q) || j.qualification.toLowerCase().includes(q)
+    const jobs = (await this.getJobs()).filter(
+      (j) => j.title.toLowerCase().includes(q) || (j.organization?.name || '').toLowerCase().includes(q) || (j.qualification || '').toLowerCase().includes(q)
     );
-    const exams = MOCK_EXAMS.filter((e) => e.name.toLowerCase().includes(q) || e.code.toLowerCase().includes(q));
+    const exams = (await this.getExams()).filter((e) => e.name.toLowerCase().includes(q) || e.code.toLowerCase().includes(q));
     const techJobs = MOCK_TECH_JOBS.filter((t) => t.title.toLowerCase().includes(q) || t.skills.some((s) => s.toLowerCase().includes(q)));
     return { jobs, exams, techJobs };
   },
 };
+

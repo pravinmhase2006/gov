@@ -83,3 +83,77 @@ model Exam {
   createdAt           DateTime      @default(now())
   updatedAt           DateTime      @updatedAt
 }
+
+model MockTest {
+  id              String        @id @default(auto()) @map("_id") @db.ObjectId
+  title           String
+  slug            String        @unique
+  examName        String
+  examCategory    String        @default("GOVT")
+  durationMinutes Int           @default(60)
+  totalQuestions  Int           @default(100)
+  totalMarks      Int           @default(200)
+  difficulty      String        @default("MODERATE")
+  attemptsCount   Int           @default(0)
+  isLive          Boolean       @default(true)
+  questions       Question[]
+  results         TestResult[]
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+}
+
+type QuestionOption {
+  id        String
+  text      String
+  textHindi String?
+  isCorrect Boolean @default(false)
+}
+
+model Question {
+  id            String           @id @default(auto()) @map("_id") @db.ObjectId
+  testId        String           @db.ObjectId
+  test          MockTest         @relation(fields: [testId], references: [id], onDelete: Cascade)
+  questionText  String
+  questionHindi String?
+  options       QuestionOption[]
+  explanation   String?
+  subject       String
+  difficulty    String           @default("MEDIUM")
+  marks         Float            @default(2)
+  negativeMarks Float            @default(0.5)
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+}
+
+model TestResult {
+  id                String    @id @default(auto()) @map("_id") @db.ObjectId
+  testId            String    @db.ObjectId
+  test              MockTest  @relation(fields: [testId], references: [id], onDelete: Cascade)
+  userId            String?   @db.ObjectId
+  candidateName     String    @default("Anonymous Aspirant")
+  score             Float
+  totalMarks        Float
+  accuracyPercent   Float
+  timeTakenSeconds  Int
+  correctCount      Int
+  incorrectCount    Int
+  unattemptedCount  Int
+  createdAt         DateTime  @default(now())
+}
+
+model TechJob {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  title       String
+  slug        String    @unique
+  company     String
+  location    String
+  jobType     String    @default("FULL_TIME")
+  experience  String
+  salaryText  String?
+  skills      String[]
+  applyUrl    String?
+  isTrending  Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+

@@ -132,18 +132,20 @@ export default function HomePage() {
 
             {/* Main Search Box */}
             <form onSubmit={handleSearchSubmit} className="max-w-2xl mx-auto mt-6">
-              <div className="relative flex items-center bg-white dark:bg-slate-900 rounded-2xl p-2 shadow-2xl border border-slate-200 dark:border-slate-700">
-                <Search className="w-5 h-5 text-slate-400 ml-3 shrink-0" />
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search 10,000+ jobs (e.g. SSC CGL, Railway NTPC, Banking, 10th Pass)..."
-                  className="w-full px-3 py-2.5 text-sm sm:text-base bg-transparent text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none"
-                />
+              <div className="relative flex flex-col sm:flex-row items-stretch sm:items-center bg-white dark:bg-slate-900 rounded-2xl p-2 shadow-2xl border border-slate-200 dark:border-slate-700 gap-2">
+                <div className="flex items-center flex-1 px-2">
+                  <Search className="w-5 h-5 text-slate-400 shrink-0" />
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Search 10,000+ jobs (e.g. SSC CGL, Railway NTPC, Banking, 10th Pass)..."
+                    className="w-full px-3 py-2.5 text-sm sm:text-base bg-transparent text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none"
+                  />
+                </div>
                 <button
                   type="submit"
-                  className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold px-6 py-3 rounded-xl transition-colors shrink-0 shadow-md hover:shadow-lg"
+                  className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold px-6 py-3 rounded-xl transition-colors shrink-0 shadow-md hover:shadow-lg w-full sm:w-auto"
                 >
                   Search Jobs
                 </button>
@@ -173,7 +175,7 @@ export default function HomePage() {
           </div>
 
           {/* Live Metrics Grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-12 pt-8 border-t border-slate-800/60 text-center">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mt-12 pt-8 border-t border-slate-800/60 text-center">
             <div className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800">
               <div className="text-2xl sm:text-3xl font-black text-blue-400">
                 <AnimatedCounter target={85420} suffix="+" />
@@ -204,7 +206,7 @@ export default function HomePage() {
 
       {/* 2. SARKARI QUICK ACTION TILES (Grid Format) */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-6 relative z-20">
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-4">
           {[
             { title: 'Latest Jobs', count: '14,500+ Posts', icon: Briefcase, to: '/jobs', color: 'bg-blue-600' },
             { title: 'Results', count: 'Declared Today', icon: Award, to: '/results', color: 'bg-emerald-600' },

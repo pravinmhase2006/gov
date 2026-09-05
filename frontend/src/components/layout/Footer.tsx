@@ -35,10 +35,10 @@ export default function Footer() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 mb-12">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8 mb-12">
           
           {/* Brand Info */}
-          <div className="lg:col-span-2 space-y-4">
+          <div className="sm:col-span-2 lg:col-span-2 space-y-4">
             <Link href="/" className="flex items-center gap-2.5">
               <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-600 to-navy-900 text-white flex items-center justify-center font-black text-lg border border-blue-400">
                 <span className="text-saffron-500">G</span>P
@@ -55,7 +55,7 @@ export default function Footer() {
               <h4 className="text-xs font-bold text-white uppercase tracking-wider mb-2">
                 Join Free Exam Alert Community
               </h4>
-              <div className="flex items-center gap-3 text-xs">
+              <div className="flex flex-wrap items-center gap-3 text-xs">
                 <a
                   href="https://t.me"
                   target="_blank"
@@ -76,113 +76,103 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Qualification Links */}
-          <div>
-            <h3 className="text-xs font-bold text-white uppercase tracking-wider mb-4 border-b border-slate-800 pb-2">
-              Jobs By Qualification
-            </h3>
-            <ul className="space-y-2 text-xs">
-              <li>
-                <Link href="/qualification/10th-pass" className="hover:text-blue-400 transition-colors">
-                  10th Pass Govt Jobs (MTS/GD)
-                </Link>
-              </li>
-              <li>
-                <Link href="/qualification/12th-pass" className="hover:text-blue-400 transition-colors">
-                  12th Pass Jobs (CHSL/Constable)
-                </Link>
-              </li>
-              <li>
-                <Link href="/qualification/graduate" className="hover:text-blue-400 transition-colors">
-                  Graduate Jobs (CGL/PO/State PSC)
-                </Link>
-              </li>
-              <li>
-                <Link href="/qualification/diploma" className="hover:text-blue-400 transition-colors">
-                  Diploma Poly Technical Jobs
-                </Link>
-              </li>
-              <li>
-                <Link href="/qualification/iti" className="hover:text-blue-400 transition-colors">
-                  ITI Trade & Apprentice Jobs
-                </Link>
-              </li>
-              <li>
-                <Link href="/jobs" className="hover:text-blue-400 transition-colors">
-                  All Central & State Jobs
-                </Link>
-              </li>
-            </ul>
-          </div>
-
           {/* Exam Sectors */}
           <div>
             <h3 className="text-xs font-bold text-white uppercase tracking-wider mb-4 border-b border-slate-800 pb-2">
-              Top Exam Directories
+              Major Exam Sectors
             </h3>
             <ul className="space-y-2 text-xs">
               <li>
-                <Link href="/exams/ssc-cgl" className="hover:text-blue-400 transition-colors">
-                  SSC CGL & CHSL 2026
+                <Link href="/exams?category=SSC" className="hover:text-blue-400 transition-colors">
+                  SSC Exams (CGL, CHSL, MTS)
                 </Link>
               </li>
               <li>
-                <Link href="/exams/rrb-ntpc" className="hover:text-blue-400 transition-colors">
-                  Railway RRB NTPC & ALP
+                <Link href="/exams?category=Railways" className="hover:text-blue-400 transition-colors">
+                  Railway Recruitment (RRB NTPC/ALP)
                 </Link>
               </li>
               <li>
-                <Link href="/exams/ibps-po" className="hover:text-blue-400 transition-colors">
-                  IBPS & SBI Banking Exams
+                <Link href="/exams?category=Banking" className="hover:text-blue-400 transition-colors">
+                  Banking & Insurance (IBPS/SBI)
                 </Link>
               </li>
               <li>
-                <Link href="/exams/upsc-cse" className="hover:text-blue-400 transition-colors">
-                  UPSC Civil Services IAS
+                <Link href="/exams?category=Defence" className="hover:text-blue-400 transition-colors">
+                  Defence (NDA, CDS, AFCAT, Navy)
                 </Link>
               </li>
               <li>
-                <Link href="/jobs?category=defence-police" className="hover:text-blue-400 transition-colors">
-                  Police & Armed Forces Rally
+                <Link href="/exams?category=UPSC" className="hover:text-blue-400 transition-colors">
+                  Civil Services (UPSC CSE/IAS)
                 </Link>
               </li>
               <li>
-                <Link href="/exams" className="text-blue-400 font-semibold hover:underline">
-                  All 150+ Govt Exams →
+                <Link href="/exams?category=Teaching" className="hover:text-blue-400 transition-colors">
+                  Teaching & State Police Jobs
                 </Link>
               </li>
             </ul>
           </div>
 
-          {/* Resources & Legal */}
+          {/* Aspirant Tools */}
           <div>
             <h3 className="text-xs font-bold text-white uppercase tracking-wider mb-4 border-b border-slate-800 pb-2">
-              Prep & Legal
+              Aspirant Suite & Prep
             </h3>
             <ul className="space-y-2 text-xs">
               <li>
+                <Link href="/resume-builder" className="hover:text-blue-400 transition-colors">
+                  AI Resume & Biodata Maker
+                </Link>
+              </li>
+              <li>
                 <Link href="/mock-tests" className="hover:text-blue-400 transition-colors">
-                  Free Live Mock Tests
+                  All-India CBT Mock Tests
                 </Link>
               </li>
               <li>
-                <Link href="/current-affairs" className="hover:text-blue-400 transition-colors">
-                  Daily Current Affairs Capsules
+                <Link href="/typing-test" className="hover:text-blue-400 transition-colors">
+                  Typing Speed Simulator (DEST)
                 </Link>
               </li>
               <li>
-                <Link href="/previous-papers" className="hover:text-blue-400 transition-colors">
-                  Previous Year Papers & PDF
+                <Link href="/study-planner" className="hover:text-blue-400 transition-colors">
+                  Smart Syllabus Study Planner
                 </Link>
               </li>
               <li>
-                <Link href="/syllabus" className="hover:text-blue-400 transition-colors">
-                  Topic-wise Syllabus
+                <Link href="/flashcards" className="hover:text-blue-400 transition-colors">
+                  Daily 3D Spaced Flashcards
                 </Link>
               </li>
+              <li>
+                <Link href="/quiz-battle" className="hover:text-blue-400 transition-colors">
+                  1v1 Live Quiz Arena
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Legal & Help */}
+          <div>
+            <h3 className="text-xs font-bold text-white uppercase tracking-wider mb-4 border-b border-slate-800 pb-2">
+              Help &amp; Legal
+            </h3>
+            <ul className="space-y-2 text-xs">
               <li>
                 <Link href="/about" className="hover:text-blue-400 transition-colors">
-                  About Us
+                  About GovtPrep India
+                </Link>
+              </li>
+              <li>
+                <Link href="/contact" className="hover:text-blue-400 transition-colors">
+                  Candidate Helpdesk & Contact
+                </Link>
+              </li>
+              <li>
+                <Link href="/disclaimer" className="hover:text-blue-400 transition-colors">
+                  Disclaimer & Official Notice
                 </Link>
               </li>
               <li>
@@ -196,8 +186,8 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/api-docs" className="text-emerald-400 font-semibold hover:text-emerald-300 transition-colors flex items-center gap-1">
-                  ⚡ Swagger API Docs
+                <Link href="/contact" className="hover:text-blue-400 transition-colors">
+                  💬 24/7 Aspirant Support
                 </Link>
               </li>
             </ul>
@@ -205,9 +195,9 @@ export default function Footer() {
         </div>
 
         {/* Bottom bar */}
-        <div className="border-t border-slate-800 pt-8 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-slate-500">
+        <div className="border-t border-slate-800 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500 text-center sm:text-left">
           <p>© {new Date().getFullYear()} GovtPrep India. All rights reserved.</p>
-          <div className="flex items-center gap-4">
+          <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4">
             <Link href="/privacy-policy" className="hover:text-slate-400">
               Privacy
             </Link>
@@ -221,7 +211,7 @@ export default function Footer() {
             </Link>
             <span>•</span>
             <Link href="/contact" className="hover:text-slate-400">
-              Contact Editorial
+              Contact Support
             </Link>
           </div>
         </div>
