@@ -1,11 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import Link from '@/components/common/Link';
 import { useNavigate } from '@/lib/navigation';
-import { adminApi, authService } from '@/services/api';
+import { adminApi } from '@/services/api';
 import { useAuth } from '@/context/AuthContext';
 import {
-  ShieldAlert,
-  PlusCircle,
   Users,
   Briefcase,
   FileCheck2,
@@ -13,7 +11,6 @@ import {
   Database,
   CheckCircle,
   LogOut,
-  UploadCloud,
   Trash2,
   Edit,
   Search,
@@ -28,21 +25,48 @@ import {
   UserX,
   HelpCircle,
   Activity,
+  Menu,
+  Bell,
+  Mail,
+  MessageSquare,
+  ChevronRight,
+  ChevronDown,
+  Calendar,
+  Layers,
+  Heart,
+  FileText,
+  Clock,
+  Check,
+  TrendingUp,
+  Plus,
+  PlusCircle,
+  Home,
+  ShieldCheck,
+  Sliders,
+  BarChart3,
+  GraduationCap,
+  Eye,
+  Lock,
+  Download,
+  ShieldAlert,
+  Loader2
 } from 'lucide-react';
-import DataBoundary from '@/components/common/DataBoundary';
-import { TableSkeleton } from '@/components/common/SkeletonLoader';
 
 export default function AdminPage() {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
-  const [activeTab, setActiveTab] = useState<'analytics' | 'users' | 'jobs' | 'exams' | 'tests'>('analytics');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'users' | 'courses' | 'certificates' | 'jobs' | 'exams' | 'tests' | 'logs' | 'settings'>('dashboard');
+  const [sidebarOpen, setSidebarOpen] = useState(true);
 
   // Live Data States
   const [analytics, setAnalytics] = useState<any>(null);
   const [users, setUsers] = useState<any[]>([]);
+  const [courses, setCourses] = useState<any[]>([]);
+  const [certificates, setCertificates] = useState<any[]>([]);
   const [jobs, setJobs] = useState<any[]>([]);
   const [exams, setExams] = useState<any[]>([]);
   const [tests, setTests] = useState<any[]>([]);
+  const [logs, setLogs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -50,9 +74,35 @@ export default function AdminPage() {
   const [isJobModalOpen, setIsJobModalOpen] = useState(false);
   const [isExamModalOpen, setIsExamModalOpen] = useState(false);
   const [isTestModalOpen, setIsTestModalOpen] = useState(false);
+  const [isCourseModalOpen, setIsCourseModalOpen] = useState(false);
+  const [isCertModalOpen, setIsCertModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<any | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+
+  // Form States for Course
+  const [courseForm, setCourseForm] = useState({
+    title: '',
+    description: '',
+    category: 'Full-Stack Web Development',
+    level: 'Beginner',
+    durationHours: 12,
+    instructor: 'Aspirant Tech Academy',
+    instructorRole: 'Lead Instructor',
+    badge: 'Certification Track',
+    isPublished: true,
+    isFree: true,
+    skills: 'React, Node.js, MongoDB, TypeScript',
+  });
+
+  // Form States for Certificate
+  const [certForm, setCertForm] = useState({
+    courseTitle: 'Full-Stack Web Development Masterclass',
+    recipientName: '',
+    recipientEmail: '',
+    grade: 'Distinction',
+    skills: 'React, Node.js, REST APIs, Database Design',
+  });
 
   // Form States for Job
   const [jobForm, setJobForm] = useState({
@@ -106,19 +156,25 @@ export default function AdminPage() {
   const loadAllAdminData = async () => {
     setLoading(true);
     try {
-      const [analyticsData, usersData, jobsData, examsData, testsData] = await Promise.all([
+      const [analyticsData, usersData, coursesData, certsData, jobsData, examsData, testsData, logsData] = await Promise.all([
         adminApi.getAnalytics().catch(() => null),
         adminApi.getUsers().catch(() => []),
+        adminApi.getCourses().catch(() => []),
+        adminApi.getCertificates().catch(() => []),
         adminApi.getJobs().catch(() => []),
         adminApi.getExams().catch(() => []),
         adminApi.getTests().catch(() => []),
+        adminApi.getLogs().catch(() => []),
       ]);
 
       setAnalytics(analyticsData);
       setUsers(Array.isArray(usersData) ? usersData : []);
+      setCourses(Array.isArray(coursesData) ? coursesData : []);
+      setCertificates(Array.isArray(certsData) ? certsData : []);
       setJobs(Array.isArray(jobsData) ? jobsData : []);
       setExams(Array.isArray(examsData) ? examsData : []);
       setTests(Array.isArray(testsData) ? testsData : []);
+      setLogs(Array.isArray(logsData) ? logsData : []);
     } catch (err: any) {
       console.error('Failed to load admin data:', err);
       showToast('error', 'Error syncing with backend database.');
@@ -136,9 +192,7 @@ export default function AdminPage() {
     navigate('/login');
   };
 
-  // ==========================================
-  // USER ACTIONS
-  // ==========================================
+  // User Actions
   const handleToggleRole = async (targetUser: any) => {
     const newRole = targetUser.role === 'ADMIN' ? 'USER' : 'ADMIN';
     if (!window.confirm(`Change ${targetUser.email} role to ${newRole}?`)) return;
@@ -155,7 +209,7 @@ export default function AdminPage() {
   };
 
   const handleDeleteUser = async (targetUser: any) => {
-    if (!window.confirm(`Are you sure you want to permanently delete user "${targetUser.name || targetUser.email}"?`)) return;
+    if (!window.confirm(`Are you sure you want to delete user "${targetUser.name || targetUser.email}"?`)) return;
 
     try {
       await adminApi.deleteUser(targetUser.id);
@@ -166,9 +220,134 @@ export default function AdminPage() {
     }
   };
 
-  // ==========================================
-  // JOB CRUD ACTIONS
-  // ==========================================
+  // Course Actions
+  const handleOpenCourseModal = (courseToEdit?: any) => {
+    if (courseToEdit) {
+      setEditingItem(courseToEdit);
+      setCourseForm({
+        title: courseToEdit.title,
+        description: courseToEdit.description || '',
+        category: courseToEdit.category || 'Tech',
+        level: courseToEdit.level || 'Beginner',
+        durationHours: courseToEdit.durationHours || 10,
+        instructor: courseToEdit.instructor || 'Instructor',
+        instructorRole: courseToEdit.instructorRole || 'Lead',
+        badge: courseToEdit.badge || 'Track',
+        isPublished: courseToEdit.isPublished ?? true,
+        isFree: courseToEdit.isFree ?? true,
+        skills: Array.isArray(courseToEdit.skills) ? courseToEdit.skills.join(', ') : '',
+      });
+    } else {
+      setEditingItem(null);
+      setCourseForm({
+        title: '',
+        description: '',
+        category: 'Full-Stack Web Development',
+        level: 'Beginner',
+        durationHours: 12,
+        instructor: 'Aspirant Tech Academy',
+        instructorRole: 'Lead Instructor',
+        badge: 'Certification Track',
+        isPublished: true,
+        isFree: true,
+        skills: 'React, Node.js, MongoDB, TypeScript',
+      });
+    }
+    setIsCourseModalOpen(true);
+  };
+
+  const handleSaveCourse = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!courseForm.title || !courseForm.description) {
+      showToast('error', 'Please fill course title and description.');
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      const payload = {
+        ...courseForm,
+        skills: courseForm.skills.split(',').map((s) => s.trim()).filter(Boolean),
+      };
+
+      if (editingItem) {
+        const updated = await adminApi.updateCourse(editingItem.id, payload);
+        setCourses((prev) => prev.map((c) => (c.id === editingItem.id ? updated : c)));
+        showToast('success', `Course "${courseForm.title}" updated.`);
+      } else {
+        const created = await adminApi.createCourse(payload);
+        setCourses((prev) => [created, ...prev]);
+        showToast('success', `Course "${courseForm.title}" created!`);
+      }
+      setIsCourseModalOpen(false);
+    } catch (err: any) {
+      showToast('error', err.message || 'Failed to save course.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleDeleteCourse = async (id: string, title: string) => {
+    if (!window.confirm(`Are you sure you want to delete course "${title}"?`)) return;
+
+    try {
+      await adminApi.deleteCourse(id);
+      setCourses((prev) => prev.filter((c) => c.id !== id));
+      showToast('success', 'Course deleted.');
+    } catch (err: any) {
+      showToast('error', err.message || 'Failed to delete course.');
+    }
+  };
+
+  // Certificate Actions
+  const handleOpenCertModal = () => {
+    setCertForm({
+      courseTitle: 'Full-Stack Web Development Masterclass',
+      recipientName: '',
+      recipientEmail: '',
+      grade: 'Distinction',
+      skills: 'React, Node.js, REST APIs, Database Design',
+    });
+    setIsCertModalOpen(true);
+  };
+
+  const handleGenerateCertificate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!certForm.courseTitle || !certForm.recipientName) {
+      showToast('error', 'Please provide course title and recipient name.');
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      const payload = {
+        ...certForm,
+        skills: certForm.skills.split(',').map((s) => s.trim()).filter(Boolean),
+      };
+      const created = await adminApi.generateCertificate(payload);
+      setCertificates((prev) => [created, ...prev]);
+      showToast('success', `Issued certificate for ${certForm.recipientName}!`);
+      setIsCertModalOpen(false);
+    } catch (err: any) {
+      showToast('error', err.message || 'Failed to issue certificate.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleDeleteCertificate = async (id: string, code: string) => {
+    if (!window.confirm(`Revoke certificate "${code}"?`)) return;
+
+    try {
+      await adminApi.deleteCertificate(id);
+      setCertificates((prev) => prev.filter((c) => c.id !== id));
+      showToast('success', 'Certificate revoked.');
+    } catch (err: any) {
+      showToast('error', err.message || 'Failed to revoke certificate.');
+    }
+  };
+
+  // Job Actions
   const handleOpenJobModal = (jobToEdit?: any) => {
     if (jobToEdit) {
       setEditingItem(jobToEdit);
@@ -216,8 +395,8 @@ export default function AdminPage() {
 
   const handleSaveJob = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!jobForm.title || !jobForm.postName || !jobForm.lastDate) {
-      showToast('error', 'Please fill all required job fields.');
+    if (!jobForm.title || !jobForm.postName) {
+      showToast('error', 'Please fill required job fields.');
       return;
     }
 
@@ -226,48 +405,46 @@ export default function AdminPage() {
       if (editingItem) {
         const updated = await adminApi.updateJob(editingItem.id, jobForm);
         setJobs((prev) => prev.map((j) => (j.id === editingItem.id ? updated : j)));
-        showToast('success', `Job "${jobForm.title}" updated in database.`);
+        showToast('success', `Job "${jobForm.title}" updated.`);
       } else {
         const created = await adminApi.createJob(jobForm);
         setJobs((prev) => [created, ...prev]);
-        showToast('success', `Job notification "${jobForm.title}" published!`);
+        showToast('success', `Job "${jobForm.title}" published!`);
       }
       setIsJobModalOpen(false);
     } catch (err: any) {
-      showToast('error', err.message || 'Failed to save job notification.');
+      showToast('error', err.message || 'Failed to save job.');
     } finally {
       setSubmitting(false);
     }
   };
 
   const handleDeleteJob = async (id: string, title: string) => {
-    if (!window.confirm(`Are you sure you want to permanently delete "${title}"?`)) return;
+    if (!window.confirm(`Delete job "${title}"?`)) return;
 
     try {
       await adminApi.deleteJob(id);
       setJobs((prev) => prev.filter((j) => j.id !== id));
-      showToast('success', 'Job notification deleted from database.');
+      showToast('success', 'Job deleted.');
     } catch (err: any) {
       showToast('error', err.message || 'Failed to delete job.');
     }
   };
 
-  // ==========================================
-  // EXAM CRUD ACTIONS
-  // ==========================================
+  // Exam Actions
   const handleOpenExamModal = (examToEdit?: any) => {
     if (examToEdit) {
       setEditingItem(examToEdit);
       setExamForm({
         name: examToEdit.name,
-        code: examToEdit.code,
-        organizationName: examToEdit.organization?.name || '',
-        organizationShortName: examToEdit.organization?.shortName || '',
+        code: examToEdit.code || 'EXAM',
+        organizationName: examToEdit.organization?.name || 'Board',
+        organizationShortName: examToEdit.organization?.shortName || 'Govt',
         frequency: examToEdit.frequency || 'Annually',
         eligibilitySummary: examToEdit.eligibilitySummary || '',
         selectionProcess: examToEdit.selectionProcess || '',
         examPatternSummary: examToEdit.examPatternSummary || '',
-        isPopular: Boolean(examToEdit.isPopular),
+        isPopular: examToEdit.isPopular || false,
       });
     } else {
       setEditingItem(null);
@@ -289,7 +466,7 @@ export default function AdminPage() {
   const handleSaveExam = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!examForm.name || !examForm.code) {
-      showToast('error', 'Exam Name and Code are required.');
+      showToast('error', 'Please fill exam name and code.');
       return;
     }
 
@@ -298,11 +475,11 @@ export default function AdminPage() {
       if (editingItem) {
         const updated = await adminApi.updateExam(editingItem.id, examForm);
         setExams((prev) => prev.map((ex) => (ex.id === editingItem.id ? updated : ex)));
-        showToast('success', `Exam "${examForm.name}" updated successfully!`);
+        showToast('success', `Exam "${examForm.name}" updated.`);
       } else {
         const created = await adminApi.createExam(examForm);
         setExams((prev) => [created, ...prev]);
-        showToast('success', `Exam "${examForm.name}" created successfully!`);
+        showToast('success', `Exam board "${examForm.name}" added!`);
       }
       setIsExamModalOpen(false);
     } catch (err: any) {
@@ -313,33 +490,32 @@ export default function AdminPage() {
   };
 
   const handleDeleteExam = async (id: string, name: string) => {
-    if (!window.confirm(`Are you sure you want to delete exam "${name}"?`)) return;
+    if (!window.confirm(`Delete exam "${name}"?`)) return;
 
     try {
       await adminApi.deleteExam(id);
       setExams((prev) => prev.filter((e) => e.id !== id));
-      showToast('success', 'Exam deleted successfully.');
+      showToast('success', 'Exam deleted.');
     } catch (err: any) {
       showToast('error', err.message || 'Failed to delete exam.');
     }
   };
 
-  // ==========================================
-  // MOCK TEST CRUD ACTIONS
-  // ==========================================
-  const handleSaveTest = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!testForm.title || !testForm.examName) {
-      showToast('error', 'Test Title and Exam Name are required.');
-      return;
-    }
-
-    setSubmitting(true);
-    try {
-      const created = await adminApi.createTest(testForm);
-      setTests((prev) => [created, ...prev]);
-      showToast('success', `Mock Test "${testForm.title}" published!`);
-      setIsTestModalOpen(false);
+  // Mock Test Actions
+  const handleOpenTestModal = (testToEdit?: any) => {
+    if (testToEdit) {
+      setEditingItem(testToEdit);
+      setTestForm({
+        title: testToEdit.title,
+        examName: testToEdit.examName || 'SSC CGL',
+        examCategory: testToEdit.examCategory || 'SSC',
+        durationMinutes: testToEdit.durationMinutes || 60,
+        totalQuestions: testToEdit.totalQuestions || 25,
+        totalMarks: testToEdit.totalMarks || 50,
+        difficulty: testToEdit.difficulty || 'MODERATE',
+      });
+    } else {
+      setEditingItem(null);
       setTestForm({
         title: '',
         examName: 'SSC CGL',
@@ -349,8 +525,31 @@ export default function AdminPage() {
         totalMarks: 50,
         difficulty: 'MODERATE',
       });
+    }
+    setIsTestModalOpen(true);
+  };
+
+  const handleSaveTest = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!testForm.title) {
+      showToast('error', 'Please enter test title.');
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      if (editingItem) {
+        const updated = await adminApi.updateTest(editingItem.id, testForm);
+        setTests((prev) => prev.map((t) => (t.id === editingItem.id ? updated : t)));
+        showToast('success', `Mock Test "${testForm.title}" updated.`);
+      } else {
+        const created = await adminApi.createTest(testForm);
+        setTests((prev) => [created, ...prev]);
+        showToast('success', `Mock Test "${testForm.title}" created!`);
+      }
+      setIsTestModalOpen(false);
     } catch (err: any) {
-      showToast('error', err.message || 'Failed to create mock test.');
+      showToast('error', err.message || 'Failed to save mock test.');
     } finally {
       setSubmitting(false);
     }
@@ -364,943 +563,1400 @@ export default function AdminPage() {
       setTests((prev) => prev.filter((t) => t.id !== id));
       showToast('success', 'Mock test deleted.');
     } catch (err: any) {
-      showToast('error', err.message || 'Failed to delete test.');
+      showToast('error', err.message || 'Failed to delete mock test.');
     }
   };
 
-  // Filtering
-  const filteredUsers = users.filter((u) => {
-    const q = searchQuery.toLowerCase();
-    return (u.name || '').toLowerCase().includes(q) || (u.email || '').toLowerCase().includes(q);
-  });
-
-  const filteredJobs = jobs.filter((j) => {
-    const q = searchQuery.toLowerCase();
-    return (j.title || '').toLowerCase().includes(q) || (j.organization?.name || '').toLowerCase().includes(q);
-  });
-
-  const filteredExams = exams.filter((e) => {
-    const q = searchQuery.toLowerCase();
-    return (e.name || '').toLowerCase().includes(q) || (e.code || '').toLowerCase().includes(q);
-  });
-
-  const filteredTests = tests.filter((t) => {
-    const q = searchQuery.toLowerCase();
-    return (t.title || '').toLowerCase().includes(q) || (t.examName || '').toLowerCase().includes(q);
-  });
+  const totalVacanciesCount = jobs.reduce((acc, curr) => acc + (curr.totalVacancies || 0), 0);
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 py-8 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto space-y-6">
+    <div className="min-h-screen bg-[#f4f7f9] text-slate-800 font-sans flex flex-col">
+      {/* 1. TOP CYAN/TEAL NAVBAR */}
+      <header className="bg-gradient-to-r from-[#009ca6] via-[#00a8a8] to-[#00b4b4] text-white shadow-md sticky top-0 z-50 h-14 flex items-center justify-between px-4">
+        {/* Brand Logo & Menu Button */}
+        <div className="flex items-center gap-4">
+          <Link to="/admin" className="flex items-center gap-2.5 group">
+            <div className="w-8 h-8 rounded-lg bg-white/20 backdrop-blur-md flex items-center justify-center font-black text-white text-base shadow-sm">
+              ⚡
+            </div>
+            <span className="font-extrabold text-lg tracking-wider text-white">
+              FAB ADMIN
+            </span>
+          </Link>
 
-        {/* Toast Notification Banner */}
-        {notification && (
-          <div
-            className={`p-4 rounded-2xl flex items-center justify-between text-xs font-bold shadow-lg animate-in slide-in-from-top-2 ${
-              notification.type === 'success' ? 'bg-emerald-600 text-white' : 'bg-rose-600 text-white'
-            }`}
+          <button
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            className="p-1.5 rounded-lg hover:bg-white/15 transition-colors text-white/90 hover:text-white cursor-pointer"
+            title="Toggle Sidebar"
           >
-            <div className="flex items-center gap-2">
-              <CheckCircle className="w-4 h-4 shrink-0" />
-              <span>{notification.message}</span>
-            </div>
-            <button onClick={() => setNotification(null)}>
-              <X className="w-4 h-4" />
-            </button>
-          </div>
-        )}
+            <Menu className="w-5 h-5" />
+          </button>
 
-        {/* Top Header Card */}
-        <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-8 text-slate-900 dark:text-white shadow-sm border border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <div className="flex items-center gap-4">
-            <div className="p-3.5 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 rounded-2xl">
-              <ShieldAlert className="w-8 h-8" />
+          {/* Breadcrumb Header Button */}
+          <div className="hidden sm:flex items-center gap-1.5 bg-black/15 hover:bg-black/25 px-3 py-1 rounded-md text-xs font-semibold text-white/95 transition-colors cursor-pointer">
+            <span className="capitalize">{activeTab}</span>
+            <ChevronDown className="w-3.5 h-3.5 opacity-80" />
+          </div>
+        </div>
+
+        {/* Top Right Utilities & Notifications */}
+        <div className="flex items-center gap-3 sm:gap-4">
+          <div className="relative hidden md:block">
+            <Search className="w-4 h-4 text-white/70 absolute left-2.5 top-1/2 -translate-y-1/2" />
+            <input
+              type="text"
+              placeholder="Search in database..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-8 pr-3 py-1 bg-black/15 hover:bg-black/20 focus:bg-black/30 rounded-md text-xs text-white placeholder-white/60 focus:outline-none focus:ring-1 focus:ring-white/40 w-44 lg:w-56 transition-all"
+            />
+          </div>
+
+          <button className="relative p-1.5 rounded-full hover:bg-white/15 transition-colors text-white cursor-pointer">
+            <Mail className="w-4 h-4" />
+            <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-rose-500 text-[10px] font-bold rounded-full flex items-center justify-center border border-white">
+              {logs.length > 0 ? logs.length : 5}
+            </span>
+          </button>
+
+          <button className="relative p-1.5 rounded-full hover:bg-white/15 transition-colors text-white cursor-pointer">
+            <Bell className="w-4 h-4" />
+            <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-amber-500 text-[10px] font-bold rounded-full flex items-center justify-center border border-white">
+              {certificates.length > 0 ? certificates.length : 3}
+            </span>
+          </button>
+
+          {/* User Profile Pill */}
+          <div className="flex items-center gap-2 pl-2 border-l border-white/20">
+            <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-purple-500 to-pink-500 flex items-center justify-center text-white text-xs font-bold ring-2 ring-white/50 shadow-sm">
+              {user?.name ? user.name.charAt(0).toUpperCase() : 'A'}
             </div>
+            <span className="hidden lg:inline-block text-xs font-bold text-white max-w-[120px] truncate">
+              {user?.name || 'Administrator'}
+            </span>
+          </div>
+
+          <button
+            onClick={handleLogout}
+            title="Logout"
+            className="p-1.5 rounded-full hover:bg-rose-600/80 transition-colors text-white cursor-pointer"
+          >
+            <LogOut className="w-4 h-4" />
+          </button>
+        </div>
+      </header>
+
+      {/* 2. MAIN LAYOUT: SIDEBAR + CONTENT */}
+      <div className="flex flex-1 overflow-hidden">
+        {/* LEFT NAVY SIDEBAR */}
+        <aside
+          className={`${
+            sidebarOpen ? 'w-64' : 'w-0 -translate-x-full lg:w-16 lg:translate-x-0'
+          } bg-[#1e293b] text-slate-300 transition-all duration-300 flex flex-col shrink-0 overflow-y-auto border-r border-slate-800 select-none z-30`}
+        >
+          {/* Top User Card Banner */}
+          <div className="p-4 bg-gradient-to-b from-[#182230] to-[#1e293b] border-b border-slate-800 flex items-center justify-between">
+            <div className="flex items-center gap-3 truncate">
+              <div className="relative">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-amber-400 to-rose-500 flex items-center justify-center text-white font-bold text-sm shadow-md">
+                  {user?.name ? user.name.charAt(0).toUpperCase() : 'A'}
+                </div>
+                <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-slate-900" />
+              </div>
+              <div className="truncate">
+                <p className="text-xs font-bold text-white truncate">{user?.name || 'Administrator'}</p>
+                <p className="text-[10px] text-emerald-400 font-semibold">● Database Synced</p>
+              </div>
+            </div>
+            <ChevronRight className="w-4 h-4 text-slate-500" />
+          </div>
+
+          {/* Navigation Links */}
+          <div className="p-3 space-y-5 text-xs">
+            {/* Section 1: CORE SECTIONS */}
             <div>
-              <div className="flex items-center gap-2 flex-wrap">
-                <h1 className="text-xl sm:text-2xl font-black">GovtPrep Admin Control Center</h1>
-                <span className="px-2.5 py-0.5 bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-300 text-[10px] font-bold rounded-full border border-red-200 dark:border-red-800">
-                  {user?.role || 'ADMIN'}
-                </span>
-              </div>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                Manage live database records, registered candidates, recruitment vacancies, exams, and CBT mock tests.
+              <p className="px-3 text-[10px] font-bold text-slate-500 tracking-wider uppercase mb-1.5">
+                PERSONAL
               </p>
+              <div className="space-y-1">
+                <button
+                  onClick={() => setActiveTab('dashboard')}
+                  className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl font-semibold transition-all cursor-pointer ${
+                    activeTab === 'dashboard'
+                      ? 'bg-[#00a8a8] text-white shadow-md'
+                      : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                  }`}
+                >
+                  <div className="flex items-center gap-2.5">
+                    <Sliders className="w-4 h-4" />
+                    <span>Dashboard</span>
+                  </div>
+                  <ChevronRight className="w-3.5 h-3.5 opacity-70" />
+                </button>
+
+                <button
+                  onClick={() => setActiveTab('users')}
+                  className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl font-semibold transition-all cursor-pointer ${
+                    activeTab === 'users'
+                      ? 'bg-[#00a8a8] text-white shadow-md'
+                      : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                  }`}
+                >
+                  <div className="flex items-center gap-2.5">
+                    <Users className="w-4 h-4" />
+                    <span>User Management</span>
+                  </div>
+                  <span className="bg-slate-800 text-[10px] px-1.5 py-0.5 rounded font-bold text-slate-300">
+                    {users.length}
+                  </span>
+                </button>
+
+                <button
+                  onClick={() => setActiveTab('courses')}
+                  className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl font-semibold transition-all cursor-pointer ${
+                    activeTab === 'courses'
+                      ? 'bg-[#00a8a8] text-white shadow-md'
+                      : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                  }`}
+                >
+                  <div className="flex items-center gap-2.5">
+                    <GraduationCap className="w-4 h-4" />
+                    <span>Courses & Modules</span>
+                  </div>
+                  <span className="bg-slate-800 text-[10px] px-1.5 py-0.5 rounded font-bold text-slate-300">
+                    {courses.length}
+                  </span>
+                </button>
+
+                <button
+                  onClick={() => setActiveTab('certificates')}
+                  className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl font-semibold transition-all cursor-pointer ${
+                    activeTab === 'certificates'
+                      ? 'bg-[#00a8a8] text-white shadow-md'
+                      : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                  }`}
+                >
+                  <div className="flex items-center gap-2.5">
+                    <Award className="w-4 h-4" />
+                    <span>Certificates</span>
+                  </div>
+                  <span className="bg-slate-800 text-[10px] px-1.5 py-0.5 rounded font-bold text-slate-300">
+                    {certificates.length}
+                  </span>
+                </button>
+              </div>
+            </div>
+
+            {/* Section 2: FORMS & CONTENT */}
+            <div>
+              <p className="px-3 text-[10px] font-bold text-slate-500 tracking-wider uppercase mb-1.5">
+                FORMS, TABLE & LAYOUTS
+              </p>
+              <div className="space-y-1">
+                <button
+                  onClick={() => setActiveTab('jobs')}
+                  className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl font-semibold transition-all cursor-pointer ${
+                    activeTab === 'jobs'
+                      ? 'bg-[#00a8a8] text-white shadow-md'
+                      : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                  }`}
+                >
+                  <div className="flex items-center gap-2.5">
+                    <Briefcase className="w-4 h-4" />
+                    <span>Jobs & Vacancies</span>
+                  </div>
+                  <span className="bg-slate-800 text-[10px] px-1.5 py-0.5 rounded font-bold text-slate-300">
+                    {jobs.length}
+                  </span>
+                </button>
+
+                <button
+                  onClick={() => setActiveTab('exams')}
+                  className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl font-semibold transition-all cursor-pointer ${
+                    activeTab === 'exams'
+                      ? 'bg-[#00a8a8] text-white shadow-md'
+                      : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                  }`}
+                >
+                  <div className="flex items-center gap-2.5">
+                    <BookOpen className="w-4 h-4" />
+                    <span>Exam Boards</span>
+                  </div>
+                  <span className="bg-slate-800 text-[10px] px-1.5 py-0.5 rounded font-bold text-slate-300">
+                    {exams.length}
+                  </span>
+                </button>
+
+                <button
+                  onClick={() => setActiveTab('tests')}
+                  className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl font-semibold transition-all cursor-pointer ${
+                    activeTab === 'tests'
+                      ? 'bg-[#00a8a8] text-white shadow-md'
+                      : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                  }`}
+                >
+                  <div className="flex items-center gap-2.5">
+                    <FileCheck2 className="w-4 h-4" />
+                    <span>Mock Tests CBT</span>
+                  </div>
+                  <span className="bg-slate-800 text-[10px] px-1.5 py-0.5 rounded font-bold text-slate-300">
+                    {tests.length}
+                  </span>
+                </button>
+              </div>
+            </div>
+
+            {/* Section 3: EXTRA & LOGS */}
+            <div>
+              <p className="px-3 text-[10px] font-bold text-slate-500 tracking-wider uppercase mb-1.5">
+                EXTRA COMPONENTS
+              </p>
+              <div className="space-y-1">
+                <button
+                  onClick={() => setActiveTab('logs')}
+                  className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl font-semibold transition-all cursor-pointer ${
+                    activeTab === 'logs'
+                      ? 'bg-[#00a8a8] text-white shadow-md'
+                      : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                  }`}
+                >
+                  <div className="flex items-center gap-2.5">
+                    <Activity className="w-4 h-4" />
+                    <span>Activity & Audit Logs</span>
+                  </div>
+                </button>
+
+                <button
+                  onClick={() => setActiveTab('settings')}
+                  className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl font-semibold transition-all cursor-pointer ${
+                    activeTab === 'settings'
+                      ? 'bg-[#00a8a8] text-white shadow-md'
+                      : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                  }`}
+                >
+                  <div className="flex items-center gap-2.5">
+                    <Settings className="w-4 h-4" />
+                    <span>Platform Settings</span>
+                  </div>
+                </button>
+
+                <Link
+                  to="/"
+                  className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl font-semibold text-slate-300 hover:bg-slate-800 hover:text-white transition-all"
+                >
+                  <div className="flex items-center gap-2.5">
+                    <Home className="w-4 h-4" />
+                    <span>Public Portal</span>
+                  </div>
+                  <ExternalLink className="w-3.5 h-3.5 opacity-70" />
+                </Link>
+              </div>
+            </div>
+          </div>
+        </aside>
+
+        {/* RIGHT MAIN CONTENT CANVAS */}
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 space-y-6">
+          {/* Notification Toast */}
+          {notification && (
+            <div
+              className={`p-4 rounded-2xl flex items-center justify-between text-xs font-bold shadow-lg animate-fadeIn ${
+                notification.type === 'success'
+                  ? 'bg-emerald-600 text-white'
+                  : 'bg-rose-600 text-white'
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                {notification.type === 'success' ? <CheckCircle className="w-4 h-4" /> : <AlertCircle className="w-4 h-4" />}
+                <span>{notification.message}</span>
+              </div>
+              <button onClick={() => setNotification(null)} className="p-1 hover:opacity-75 cursor-pointer">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          )}
+
+          {/* Breadcrumb & Title Bar */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2">
+            <div>
+              <h1 className="text-2xl font-black text-slate-800 tracking-tight capitalize">
+                {activeTab} <span className="text-slate-400 text-sm font-normal">Control panel</span>
+              </h1>
+            </div>
+            <div className="flex items-center gap-2 text-xs text-slate-500 font-semibold">
+              <Home className="w-3.5 h-3.5 text-slate-400" />
+              <span>Home</span>
+              <ChevronRight className="w-3 h-3 text-slate-400" />
+              <span className="text-slate-700 capitalize">{activeTab}</span>
             </div>
           </div>
 
-          <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
-            <button
-              onClick={loadAllAdminData}
-              className="p-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl transition-colors"
-              title="Refresh live data"
-            >
-              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-            </button>
-            <button
-              onClick={handleLogout}
-              className="px-4 py-2 bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 dark:hover:bg-slate-700 text-white text-xs font-bold rounded-xl transition-colors inline-flex items-center gap-2 shadow"
-            >
-              <LogOut className="w-3.5 h-3.5" /> Sign Out
-            </button>
-          </div>
-        </div>
+          {/* 3. TOP 4 METRIC KPI CARDS */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+            {/* Card 1: Users */}
+            <div className="bg-white rounded-2xl p-5 shadow-xs border border-slate-200/80 flex items-center gap-4 hover:shadow-md transition-shadow">
+              <div className="w-14 h-14 rounded-2xl bg-[#7c4dff] text-white flex items-center justify-center shrink-0 shadow-md shadow-purple-500/20">
+                <Users className="w-7 h-7" />
+              </div>
+              <div>
+                <p className="text-2xl font-black text-slate-800">
+                  {users.length.toLocaleString()}
+                </p>
+                <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                  REGISTERED USERS
+                </p>
+              </div>
+            </div>
 
-        {/* Live Metrics Grid */}
-        <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
-          <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
-            <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">Registered Users</span>
-            <span className="text-2xl font-black text-blue-600 dark:text-blue-400 mt-1 block">
-              {analytics?.stats?.totalUsers ?? users.length}
-            </span>
-          </div>
-          <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
-            <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">Govt Vacancies</span>
-            <span className="text-2xl font-black text-slate-900 dark:text-white mt-1 block">
-              {analytics?.stats?.totalJobs ?? jobs.length}
-            </span>
-          </div>
-          <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
-            <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">Tracked Exams</span>
-            <span className="text-2xl font-black text-purple-600 dark:text-purple-400 mt-1 block">
-              {analytics?.stats?.totalExams ?? exams.length}
-            </span>
-          </div>
-          <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
-            <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">Live Mock Tests</span>
-            <span className="text-2xl font-black text-emerald-600 dark:text-emerald-400 mt-1 block">
-              {analytics?.stats?.totalMockTests ?? tests.length}
-            </span>
-          </div>
-          <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm col-span-2 lg:col-span-1">
-            <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">Database Status</span>
-            <span className="text-2xl font-black text-emerald-500 mt-1 block">
-              Connected (Live)
-            </span>
-          </div>
-        </div>
+            {/* Card 2: Vacancies */}
+            <div className="bg-white rounded-2xl p-5 shadow-xs border border-slate-200/80 flex items-center gap-4 hover:shadow-md transition-shadow">
+              <div className="w-14 h-14 rounded-2xl bg-[#ff9800] text-white flex items-center justify-center shrink-0 shadow-md shadow-amber-500/20">
+                <FileText className="w-7 h-7" />
+              </div>
+              <div>
+                <p className="text-2xl font-black text-slate-800">
+                  {totalVacanciesCount.toLocaleString()}
+                </p>
+                <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                  ACTIVE VACANCIES
+                </p>
+              </div>
+            </div>
 
-        {/* Tab Navigation */}
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3 gap-3">
-          <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0">
-            <button
-              onClick={() => { setActiveTab('analytics'); setSearchQuery(''); }}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all shrink-0 ${
-                activeTab === 'analytics'
-                  ? 'bg-blue-600 text-white shadow-sm'
-                  : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800'
-              }`}
-            >
-              📊 Analytics Overview
-            </button>
-            <button
-              onClick={() => { setActiveTab('users'); setSearchQuery(''); }}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all shrink-0 ${
-                activeTab === 'users'
-                  ? 'bg-blue-600 text-white shadow-sm'
-                  : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800'
-              }`}
-            >
-              👥 Users Manager ({users.length})
-            </button>
-            <button
-              onClick={() => { setActiveTab('jobs'); setSearchQuery(''); }}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all shrink-0 ${
-                activeTab === 'jobs'
-                  ? 'bg-blue-600 text-white shadow-sm'
-                  : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800'
-              }`}
-            >
-              🏛️ Jobs Manager ({jobs.length})
-            </button>
-            <button
-              onClick={() => { setActiveTab('exams'); setSearchQuery(''); }}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all shrink-0 ${
-                activeTab === 'exams'
-                  ? 'bg-blue-600 text-white shadow-sm'
-                  : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800'
-              }`}
-            >
-              📚 Exams Manager ({exams.length})
-            </button>
-            <button
-              onClick={() => { setActiveTab('tests'); setSearchQuery(''); }}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all shrink-0 ${
-                activeTab === 'tests'
-                  ? 'bg-blue-600 text-white shadow-sm'
-                  : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800'
-              }`}
-            >
-              📝 CBT Mock Tests ({tests.length})
-            </button>
+            {/* Card 3: Courses */}
+            <div className="bg-white rounded-2xl p-5 shadow-xs border border-slate-200/80 flex items-center gap-4 hover:shadow-md transition-shadow">
+              <div className="w-14 h-14 rounded-2xl bg-[#0091ea] text-white flex items-center justify-center shrink-0 shadow-md shadow-blue-500/20">
+                <GraduationCap className="w-7 h-7" />
+              </div>
+              <div>
+                <p className="text-2xl font-black text-slate-800">
+                  {courses.length.toLocaleString()}
+                </p>
+                <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                  TECH COURSES
+                </p>
+              </div>
+            </div>
+
+            {/* Card 4: Certificates */}
+            <div className="bg-white rounded-2xl p-5 shadow-xs border border-slate-200/80 flex items-center gap-4 hover:shadow-md transition-shadow">
+              <div className="w-14 h-14 rounded-2xl bg-[#00b4d8] text-white flex items-center justify-center shrink-0 shadow-md shadow-cyan-500/20">
+                <Award className="w-7 h-7" />
+              </div>
+              <div>
+                <p className="text-2xl font-black text-slate-800">
+                  {certificates.length.toLocaleString()}
+                </p>
+                <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                  CERTIFICATES ISSUED
+                </p>
+              </div>
+            </div>
           </div>
 
-          <div className="flex items-center gap-2 shrink-0">
-            {activeTab === 'jobs' && (
-              <button
-                onClick={() => handleOpenJobModal()}
-                className="inline-flex items-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl shadow-sm transition-all"
-              >
-                <PlusCircle className="w-4 h-4" /> Post New Vacancy
-              </button>
-            )}
-            {activeTab === 'exams' && (
-              <button
-                onClick={() => handleOpenExamModal()}
-                className="inline-flex items-center gap-1.5 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold rounded-xl shadow-sm transition-all"
-              >
-                <PlusCircle className="w-4 h-4" /> Add Exam Notification
-              </button>
-            )}
-            {activeTab === 'tests' && (
-              <button
-                onClick={() => setIsTestModalOpen(true)}
-                className="inline-flex items-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-sm transition-all"
-              >
-                <PlusCircle className="w-4 h-4" /> Create Mock Test
-              </button>
-            )}
-          </div>
-        </div>
+          {/* TAB 1: DASHBOARD OVERVIEW */}
+          {activeTab === 'dashboard' && (
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+              {/* Left Column (4 cols): Vitals & Weekly Trend */}
+              <div className="lg:col-span-4 space-y-6">
+                <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-xs">
+                  <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                    <h3 className="font-bold text-sm text-slate-800">Platform Health & Vitals</h3>
+                    <Sparkles className="w-4 h-4 text-amber-500" />
+                  </div>
 
-        {/* TAB 0: ANALYTICS OVERVIEW */}
-        {activeTab === 'analytics' && (
-          <div className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Recent User Signups */}
-              <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="font-extrabold text-sm text-slate-900 dark:text-white flex items-center gap-2">
-                    <Users className="w-4 h-4 text-blue-600" /> Recent User Registrations
-                  </h3>
-                  <button
-                    onClick={() => setActiveTab('users')}
-                    className="text-xs font-bold text-blue-600 hover:underline"
-                  >
-                    View All →
-                  </button>
-                </div>
-                <div className="divide-y divide-slate-100 dark:divide-slate-800">
-                  {users.slice(0, 5).map((u) => (
-                    <div key={u.id} className="py-3 flex items-center justify-between">
-                      <div>
-                        <span className="font-bold text-xs text-slate-900 dark:text-white block">
-                          {u.name || 'Aspirant'}
-                        </span>
-                        <span className="text-[11px] text-slate-500">{u.email}</span>
-                      </div>
-                      <span className={`px-2 py-0.5 text-[10px] font-bold rounded ${
-                        u.role === 'ADMIN' ? 'bg-purple-100 text-purple-800' : 'bg-slate-100 text-slate-700'
-                      }`}>
-                        {u.role}
-                      </span>
+                  <div className="grid grid-cols-2 gap-3 my-4">
+                    <div className="bg-slate-50 p-3 rounded-xl border border-slate-100 text-center">
+                      <span className="text-[10px] text-slate-400 font-bold block">TOTAL EXAMS</span>
+                      <span className="text-xl font-black text-slate-800">{exams.length}</span>
                     </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Recent Jobs */}
-              <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="font-extrabold text-sm text-slate-900 dark:text-white flex items-center gap-2">
-                    <Briefcase className="w-4 h-4 text-emerald-600" /> Latest Recruitment Notices
-                  </h3>
-                  <button
-                    onClick={() => setActiveTab('jobs')}
-                    className="text-xs font-bold text-blue-600 hover:underline"
-                  >
-                    View All →
-                  </button>
-                </div>
-                <div className="divide-y divide-slate-100 dark:divide-slate-800">
-                  {jobs.slice(0, 5).map((j) => (
-                    <div key={j.id} className="py-3 flex items-center justify-between">
-                      <div className="max-w-[70%]">
-                        <span className="font-bold text-xs text-slate-900 dark:text-white block line-clamp-1">
-                          {j.title}
-                        </span>
-                        <span className="text-[11px] text-slate-500">
-                          {j.organization?.shortName || 'Govt'} • {j.totalVacancies || 0} Vacancies
-                        </span>
-                      </div>
-                      <span className="text-xs font-semibold text-rose-600">
-                        {j.lastDate}
-                      </span>
+                    <div className="bg-slate-50 p-3 rounded-xl border border-slate-100 text-center">
+                      <span className="text-[10px] text-slate-400 font-bold block">MOCK TESTS</span>
+                      <span className="text-xl font-black text-cyan-600">{tests.length}</span>
                     </div>
-                  ))}
+                  </div>
+
+                  <div className="p-3 bg-emerald-500 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-sm">
+                    <CheckCircle className="w-4 h-4" />
+                    <span>Database Status: Connected & Synced</span>
+                  </div>
                 </div>
-              </div>
-            </div>
-          </div>
-        )}
 
-        {/* TAB 1: USERS MANAGER */}
-        {activeTab === 'users' && (
-          <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
-            <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-              <div className="relative flex-1 max-w-md">
-                <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Filter users by name or email..."
-                  className="w-full pl-9 pr-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white focus:outline-none"
-                />
-              </div>
-              <span className="text-xs text-slate-500 font-medium">
-                Showing {filteredUsers.length} registered accounts
-              </span>
-            </div>
+                {/* Weekly Dynamic Activity Bar Chart */}
+                <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-xs">
+                  <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                    <h3 className="font-bold text-sm text-slate-800">Weekly Activity Trends</h3>
+                    <div className="flex items-center gap-2 text-[11px] font-bold">
+                      <span className="text-[#00b4d8]">● Registrations</span>
+                      <span className="text-rose-500">● Tests</span>
+                    </div>
+                  </div>
 
-            <div className="table-responsive">
-              <table className="w-full min-w-[700px] text-xs text-left border-collapse">
-                <thead className="bg-slate-50 dark:bg-slate-800/60 font-bold text-slate-600 dark:text-slate-300 border-b border-slate-200 dark:border-slate-800">
-                  <tr>
-                    <th className="p-4">User Details</th>
-                    <th className="p-4">Role</th>
-                    <th className="p-4">Verification</th>
-                    <th className="p-4">Registered Date</th>
-                    <th className="p-4 text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-slate-800 dark:text-slate-200">
-                  {filteredUsers.map((u) => (
-                    <tr key={u.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors">
-                      <td className="p-4 font-bold">
-                        <span className="text-slate-900 dark:text-white block">{u.name || 'Candidate'}</span>
-                        <span className="text-[11px] text-slate-500 font-normal">{u.email}</span>
-                      </td>
-                      <td className="p-4">
-                        <span className={`px-2.5 py-1 text-[10px] font-bold rounded-lg border ${
-                          u.role === 'ADMIN'
-                            ? 'bg-purple-50 dark:bg-purple-900/40 text-purple-800 dark:text-purple-300 border-purple-200'
-                            : 'bg-blue-50 dark:bg-blue-900/40 text-blue-800 dark:text-blue-300 border-blue-200'
-                        }`}>
-                          {u.role}
-                        </span>
-                      </td>
-                      <td className="p-4">
-                        <span className="text-emerald-600 font-semibold flex items-center gap-1">
-                          <CheckCircle className="w-3.5 h-3.5" /> Verified
-                        </span>
-                      </td>
-                      <td className="p-4 text-slate-500">
-                        {u.createdAt ? new Date(u.createdAt).toLocaleDateString() : 'Active'}
-                      </td>
-                      <td className="p-4 text-right">
-                        <div className="inline-flex items-center gap-2">
-                          <button
-                            onClick={() => handleToggleRole(u)}
-                            className="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold rounded-lg transition-colors"
-                            title="Toggle User/Admin Role"
-                          >
-                            {u.role === 'ADMIN' ? 'Demote to User' : 'Promote to Admin'}
-                          </button>
-                          <button
-                            onClick={() => handleDeleteUser(u)}
-                            className="p-1.5 text-slate-400 hover:text-red-600 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors"
-                            title="Delete User"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
+                  <div className="pt-6 pb-2">
+                    <div className="h-44 flex items-end justify-between gap-2 px-2 border-b border-slate-100">
+                      {(analytics?.weeklyChart || [
+                        { day: 'Mon', registrations: 12, testsTaken: 18 },
+                        { day: 'Tue', registrations: 19, testsTaken: 25 },
+                        { day: 'Wed', registrations: 15, testsTaken: 30 },
+                        { day: 'Thu', registrations: 22, testsTaken: 28 },
+                        { day: 'Fri', registrations: 18, testsTaken: 20 },
+                        { day: 'Sat', registrations: 28, testsTaken: 38 },
+                        { day: 'Sun', registrations: 32, testsTaken: 45 },
+                      ]).map((item: any, i: number) => (
+                        <div key={i} className="flex items-end gap-1.5 h-full">
+                          <div
+                            style={{ height: `${Math.min(100, item.registrations * 3)}%` }}
+                            className="w-3.5 bg-[#00b4d8] rounded-t-sm transition-all"
+                            title={`Registrations: ${item.registrations}`}
+                          />
+                          <div
+                            style={{ height: `${Math.min(100, item.testsTaken * 2)}%` }}
+                            className="w-3.5 bg-rose-500 rounded-t-sm transition-all"
+                            title={`Tests: ${item.testsTaken}`}
+                          />
                         </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
-
-        {/* TAB 2: JOBS MANAGEMENT */}
-        {activeTab === 'jobs' && (
-          <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
-            <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-              <div className="relative flex-1 max-w-md">
-                <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Filter published jobs by title or board..."
-                  className="w-full pl-9 pr-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white focus:outline-none"
-                />
+                      ))}
+                    </div>
+                    <div className="flex justify-between text-[10px] text-slate-400 font-semibold px-2 pt-2">
+                      <span>Mon</span>
+                      <span>Tue</span>
+                      <span>Wed</span>
+                      <span>Thu</span>
+                      <span>Fri</span>
+                      <span>Sat</span>
+                      <span>Sun</span>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <span className="text-xs text-slate-500 font-medium">
-                Showing {filteredJobs.length} recruitment postings
-              </span>
-            </div>
 
-            <div className="table-responsive">
-              <table className="w-full min-w-[700px] text-xs text-left border-collapse">
-                <thead className="bg-slate-50 dark:bg-slate-800/60 font-bold text-slate-600 dark:text-slate-300 border-b border-slate-200 dark:border-slate-800">
-                  <tr>
-                    <th className="p-4">Recruitment Title</th>
-                    <th className="p-4">Board / Org</th>
-                    <th className="p-4">Vacancies</th>
-                    <th className="p-4">Last Date</th>
-                    <th className="p-4 text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-slate-800 dark:text-slate-200">
-                  {filteredJobs.map((job) => (
-                    <tr key={job.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors">
-                      <td className="p-4 font-bold max-w-xs">
-                        <Link to={`/jobs/${job.slug}`} className="hover:text-blue-600 line-clamp-1">
-                          {job.title}
-                        </Link>
-                        <span className="text-[10px] text-slate-400 font-normal block mt-0.5">
-                          {job.postName || 'Various Posts'}
-                        </span>
-                      </td>
-                      <td className="p-4">
-                        <span className="px-2.5 py-0.5 bg-blue-50 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 font-bold rounded text-[11px]">
-                          {job.organization?.shortName || job.organization?.name || 'Govt'}
-                        </span>
-                      </td>
-                      <td className="p-4 font-semibold">
-                        {job.totalVacancies?.toLocaleString('en-IN') || '—'} Posts
-                      </td>
-                      <td className="p-4 font-semibold text-rose-600 dark:text-rose-400">
-                        {job.lastDate}
-                      </td>
-                      <td className="p-4 text-right">
-                        <div className="inline-flex items-center gap-1.5">
+              {/* Right Column (8 cols): Recent Jobs & Activity Grid */}
+              <div className="lg:col-span-8 space-y-6">
+                <div className="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
+                  <div className="p-5 border-b border-slate-100 flex items-center justify-between">
+                    <div>
+                      <h3 className="font-bold text-base text-slate-800">Recent Job Notifications</h3>
+                      <p className="text-xs text-slate-400">Live listings synchronized from MongoDB</p>
+                    </div>
+                    <button
+                      onClick={() => handleOpenJobModal()}
+                      className="px-3 py-1.5 bg-[#00a8a8] text-white font-bold text-xs rounded-xl flex items-center gap-1 shadow-sm cursor-pointer"
+                    >
+                      <Plus className="w-3.5 h-3.5" /> Publish Job
+                    </button>
+                  </div>
+
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-xs">
+                      <thead className="bg-slate-50/80 text-slate-500 font-bold border-b border-slate-100 uppercase tracking-wider text-[10px]">
+                        <tr>
+                          <th className="py-3 px-4">No.</th>
+                          <th className="py-3 px-4">Job Title</th>
+                          <th className="py-3 px-4">Board</th>
+                          <th className="py-3 px-4">Vacancies</th>
+                          <th className="py-3 px-4">Status</th>
+                          <th className="py-3 px-4 text-right">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100 text-slate-700">
+                        {jobs.length === 0 ? (
+                          <tr>
+                            <td colSpan={6} className="py-8 text-center text-slate-400">
+                              No jobs found in database. Click "Publish Job" to add one.
+                            </td>
+                          </tr>
+                        ) : (
+                          jobs.slice(0, 5).map((job, idx) => (
+                            <tr key={job.id || idx} className="hover:bg-slate-50/70 transition-colors">
+                              <td className="py-3.5 px-4 font-bold text-slate-400">{idx + 1}</td>
+                              <td className="py-3.5 px-4 font-bold text-slate-800 max-w-[200px] truncate">
+                                {job.title}
+                              </td>
+                              <td className="py-3.5 px-4 font-medium text-slate-600">
+                                {job.organization?.shortName || job.organization?.name || 'Govt'}
+                              </td>
+                              <td className="py-3.5 px-4 font-bold text-slate-800">
+                                {job.totalVacancies ? `${job.totalVacancies} Posts` : '—'}
+                              </td>
+                              <td className="py-3.5 px-4">
+                                <span className="px-2 py-0.5 rounded font-bold text-[10px] bg-emerald-500/10 text-emerald-700 border border-emerald-500/20">
+                                  Published
+                                </span>
+                              </td>
+                              <td className="py-3.5 px-4 text-right space-x-2">
+                                <button
+                                  onClick={() => handleOpenJobModal(job)}
+                                  className="text-blue-600 hover:text-blue-800 font-bold cursor-pointer"
+                                >
+                                  Edit
+                                </button>
+                                <button
+                                  onClick={() => handleDeleteJob(job.id, job.title)}
+                                  className="text-rose-600 hover:text-rose-800 font-bold cursor-pointer"
+                                >
+                                  Delete
+                                </button>
+                              </td>
+                            </tr>
+                          ))
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 2: USER MANAGEMENT */}
+          {activeTab === 'users' && (
+            <div className="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
+              <div className="p-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                  <h3 className="font-bold text-base text-slate-800">Registered Users</h3>
+                  <p className="text-xs text-slate-400">Total {users.length} registered candidates & administrators</p>
+                </div>
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs">
+                  <thead className="bg-slate-50/80 text-slate-500 font-bold border-b border-slate-100 uppercase tracking-wider text-[10px]">
+                    <tr>
+                      <th className="py-3 px-4">User</th>
+                      <th className="py-3 px-4">Email Address</th>
+                      <th className="py-3 px-4">Role</th>
+                      <th className="py-3 px-4">Status</th>
+                      <th className="py-3 px-4">Joined Date</th>
+                      <th className="py-3 px-4 text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 text-slate-700">
+                    {users.length === 0 ? (
+                      <tr>
+                        <td colSpan={6} className="py-8 text-center text-slate-400">
+                          No users found in database.
+                        </td>
+                      </tr>
+                    ) : (
+                      users.map((u) => (
+                        <tr key={u.id} className="hover:bg-slate-50/70 transition-colors">
+                          <td className="py-3.5 px-4 font-bold text-slate-800 flex items-center gap-2">
+                            <div className="w-7 h-7 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-bold">
+                              {u.name ? u.name.charAt(0).toUpperCase() : 'U'}
+                            </div>
+                            <span>{u.name || 'Anonymous User'}</span>
+                          </td>
+                          <td className="py-3.5 px-4 font-medium text-slate-600">{u.email}</td>
+                          <td className="py-3.5 px-4">
+                            <span
+                              className={`px-2 py-0.5 rounded font-bold text-[10px] ${
+                                u.role === 'ADMIN'
+                                  ? 'bg-purple-100 text-purple-800 border border-purple-300'
+                                  : 'bg-slate-100 text-slate-700'
+                              }`}
+                            >
+                              {u.role}
+                            </span>
+                          </td>
+                          <td className="py-3.5 px-4">
+                            <span className="px-2 py-0.5 rounded font-bold text-[10px] bg-emerald-100 text-emerald-800">
+                              Active
+                            </span>
+                          </td>
+                          <td className="py-3.5 px-4 text-slate-500">
+                            {new Date(u.createdAt).toLocaleDateString()}
+                          </td>
+                          <td className="py-3.5 px-4 text-right space-x-2">
+                            <button
+                              onClick={() => handleToggleRole(u)}
+                              className="text-blue-600 hover:text-blue-800 font-bold cursor-pointer"
+                            >
+                              Toggle Role
+                            </button>
+                            <button
+                              onClick={() => handleDeleteUser(u)}
+                              className="text-rose-600 hover:text-rose-800 font-bold cursor-pointer"
+                            >
+                              Delete
+                            </button>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 3: COURSE MANAGEMENT */}
+          {activeTab === 'courses' && (
+            <div className="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
+              <div className="p-5 border-b border-slate-100 flex items-center justify-between">
+                <div>
+                  <h3 className="font-bold text-base text-slate-800">Tech & Career Courses</h3>
+                  <p className="text-xs text-slate-400">Total {courses.length} courses configured in database</p>
+                </div>
+                <button
+                  onClick={() => handleOpenCourseModal()}
+                  className="px-3.5 py-2 bg-[#00a8a8] text-white font-bold text-xs rounded-xl flex items-center gap-1.5 shadow-sm cursor-pointer"
+                >
+                  <Plus className="w-4 h-4" /> Create Course
+                </button>
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs">
+                  <thead className="bg-slate-50/80 text-slate-500 font-bold border-b border-slate-100 uppercase tracking-wider text-[10px]">
+                    <tr>
+                      <th className="py-3 px-4">Course Title</th>
+                      <th className="py-3 px-4">Category</th>
+                      <th className="py-3 px-4">Duration</th>
+                      <th className="py-3 px-4">Enrolled Count</th>
+                      <th className="py-3 px-4">Status</th>
+                      <th className="py-3 px-4 text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 text-slate-700">
+                    {courses.length === 0 ? (
+                      <tr>
+                        <td colSpan={6} className="py-8 text-center text-slate-400">
+                          No courses in database. Click "Create Course" to add one.
+                        </td>
+                      </tr>
+                    ) : (
+                      courses.map((course) => (
+                        <tr key={course.id} className="hover:bg-slate-50/70 transition-colors">
+                          <td className="py-3.5 px-4 font-bold text-slate-800">{course.title}</td>
+                          <td className="py-3.5 px-4">{course.category}</td>
+                          <td className="py-3.5 px-4">{course.durationHours} hrs</td>
+                          <td className="py-3.5 px-4 font-bold text-blue-600">{course.enrolledCount || 0}</td>
+                          <td className="py-3.5 px-4">
+                            <span className="px-2 py-0.5 rounded font-bold text-[10px] bg-emerald-100 text-emerald-800">
+                              {course.isPublished ? 'Published' : 'Draft'}
+                            </span>
+                          </td>
+                          <td className="py-3.5 px-4 text-right space-x-2">
+                            <button
+                              onClick={() => handleOpenCourseModal(course)}
+                              className="text-blue-600 hover:text-blue-800 font-bold cursor-pointer"
+                            >
+                              Edit
+                            </button>
+                            <button
+                              onClick={() => handleDeleteCourse(course.id, course.title)}
+                              className="text-rose-600 hover:text-rose-800 font-bold cursor-pointer"
+                            >
+                              Delete
+                            </button>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 4: CERTIFICATES */}
+          {activeTab === 'certificates' && (
+            <div className="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
+              <div className="p-5 border-b border-slate-100 flex items-center justify-between">
+                <div>
+                  <h3 className="font-bold text-base text-slate-800">Issued Certificates</h3>
+                  <p className="text-xs text-slate-400">Total {certificates.length} verifiable completion credentials</p>
+                </div>
+                <button
+                  onClick={handleOpenCertModal}
+                  className="px-3.5 py-2 bg-[#00a8a8] text-white font-bold text-xs rounded-xl flex items-center gap-1.5 shadow-sm cursor-pointer"
+                >
+                  <Plus className="w-4 h-4" /> Issue Certificate
+                </button>
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs">
+                  <thead className="bg-slate-50/80 text-slate-500 font-bold border-b border-slate-100 uppercase tracking-wider text-[10px]">
+                    <tr>
+                      <th className="py-3 px-4">Certificate ID</th>
+                      <th className="py-3 px-4">Recipient Name</th>
+                      <th className="py-3 px-4">Course Title</th>
+                      <th className="py-3 px-4">Grade</th>
+                      <th className="py-3 px-4">Issue Date</th>
+                      <th className="py-3 px-4 text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 text-slate-700">
+                    {certificates.length === 0 ? (
+                      <tr>
+                        <td colSpan={6} className="py-8 text-center text-slate-400">
+                          No certificates issued yet. Click "Issue Certificate" to generate one.
+                        </td>
+                      </tr>
+                    ) : (
+                      certificates.map((cert) => (
+                        <tr key={cert.id} className="hover:bg-slate-50/70 transition-colors">
+                          <td className="py-3.5 px-4 font-mono font-bold text-blue-600">{cert.certificateCode}</td>
+                          <td className="py-3.5 px-4 font-bold text-slate-800">{cert.recipientName}</td>
+                          <td className="py-3.5 px-4">{cert.courseTitle}</td>
+                          <td className="py-3.5 px-4">
+                            <span className="px-2 py-0.5 rounded font-bold text-[10px] bg-amber-100 text-amber-800">
+                              {cert.grade || 'Distinction'}
+                            </span>
+                          </td>
+                          <td className="py-3.5 px-4 text-slate-500">{new Date(cert.issueDate).toLocaleDateString()}</td>
+                          <td className="py-3.5 px-4 text-right space-x-2">
+                            <Link
+                              to={`/certificate/${cert.certificateCode}`}
+                              target="_blank"
+                              className="text-blue-600 hover:underline font-bold"
+                            >
+                              Verify Link
+                            </Link>
+                            <button
+                              onClick={() => handleDeleteCertificate(cert.id, cert.certificateCode)}
+                              className="text-rose-600 hover:text-rose-800 font-bold cursor-pointer"
+                            >
+                              Revoke
+                            </button>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 5: JOBS */}
+          {activeTab === 'jobs' && (
+            <div className="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
+              <div className="p-5 border-b border-slate-100 flex items-center justify-between">
+                <div>
+                  <h3 className="font-bold text-base text-slate-800">Government Job Vacancies</h3>
+                  <p className="text-xs text-slate-400">Total {jobs.length} recruitment notices</p>
+                </div>
+                <button
+                  onClick={() => handleOpenJobModal()}
+                  className="px-3.5 py-2 bg-[#00a8a8] text-white font-bold text-xs rounded-xl flex items-center gap-1.5 shadow-sm cursor-pointer"
+                >
+                  <Plus className="w-4 h-4" /> Publish Job
+                </button>
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs">
+                  <thead className="bg-slate-50/80 text-slate-500 font-bold border-b border-slate-100 uppercase tracking-wider text-[10px]">
+                    <tr>
+                      <th className="py-3 px-4">Title</th>
+                      <th className="py-3 px-4">Organization</th>
+                      <th className="py-3 px-4">Vacancies</th>
+                      <th className="py-3 px-4">Last Date</th>
+                      <th className="py-3 px-4 text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 text-slate-700">
+                    {jobs.map((job) => (
+                      <tr key={job.id} className="hover:bg-slate-50/70 transition-colors">
+                        <td className="py-3.5 px-4 font-bold text-slate-800">{job.title}</td>
+                        <td className="py-3.5 px-4">{job.organization?.name || 'Govt'}</td>
+                        <td className="py-3.5 px-4 font-bold text-slate-800">{job.totalVacancies}</td>
+                        <td className="py-3.5 px-4">{job.lastDate}</td>
+                        <td className="py-3.5 px-4 text-right space-x-2">
                           <button
                             onClick={() => handleOpenJobModal(job)}
-                            className="p-1.5 text-slate-400 hover:text-blue-600 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800"
-                            title="Edit Job"
+                            className="text-blue-600 hover:text-blue-800 font-bold cursor-pointer"
                           >
-                            <Edit className="w-3.5 h-3.5" />
+                            Edit
                           </button>
-                          <Link
-                            to={`/jobs/${job.slug}`}
-                            className="p-1.5 text-slate-400 hover:text-blue-600 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800"
-                            title="View Public Page"
-                          >
-                            <ExternalLink className="w-3.5 h-3.5" />
-                          </Link>
                           <button
                             onClick={() => handleDeleteJob(job.id, job.title)}
-                            className="p-1.5 text-slate-400 hover:text-red-600 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors"
-                            title="Delete Job"
+                            className="text-rose-600 hover:text-rose-800 font-bold cursor-pointer"
                           >
-                            <Trash2 className="w-3.5 h-3.5" />
+                            Delete
                           </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
-
-        {/* TAB 3: EXAMS MANAGEMENT */}
-        {activeTab === 'exams' && (
-          <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
-            <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-              <div className="relative flex-1 max-w-md">
-                <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Filter exams by title or code..."
-                  className="w-full pl-9 pr-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white focus:outline-none"
-                />
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
-              <span className="text-xs text-slate-500 font-medium">
-                Showing {filteredExams.length} tracked exams
-              </span>
             </div>
+          )}
 
-            <div className="table-responsive">
-              <table className="w-full min-w-[700px] text-xs text-left border-collapse">
-                <thead className="bg-slate-50 dark:bg-slate-800/60 font-bold text-slate-600 dark:text-slate-300 border-b border-slate-200 dark:border-slate-800">
-                  <tr>
-                    <th className="p-4">Exam Name</th>
-                    <th className="p-4">Code</th>
-                    <th className="p-4">Frequency</th>
-                    <th className="p-4">Selection Process</th>
-                    <th className="p-4 text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-slate-800 dark:text-slate-200">
-                  {filteredExams.map((exam) => (
-                    <tr key={exam.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors">
-                      <td className="p-4 font-bold text-slate-900 dark:text-white">
-                        <Link to={`/exams/${exam.slug}`} className="hover:text-blue-600">
-                          {exam.name}
-                        </Link>
-                      </td>
-                      <td className="p-4 font-mono font-bold text-purple-600 dark:text-purple-400">
-                        {exam.code}
-                      </td>
-                      <td className="p-4">{exam.frequency || 'Annually'}</td>
-                      <td className="p-4 text-slate-500 max-w-xs truncate">
-                        {exam.selectionProcess || 'CBT + Skill Test'}
-                      </td>
-                      <td className="p-4 text-right">
-                        <div className="inline-flex items-center gap-1.5">
+          {/* TAB 6: EXAMS */}
+          {activeTab === 'exams' && (
+            <div className="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
+              <div className="p-5 border-b border-slate-100 flex items-center justify-between">
+                <div>
+                  <h3 className="font-bold text-base text-slate-800">Examination Boards</h3>
+                  <p className="text-xs text-slate-400">Total {exams.length} exam schemes</p>
+                </div>
+                <button
+                  onClick={() => handleOpenExamModal()}
+                  className="px-3.5 py-2 bg-[#00a8a8] text-white font-bold text-xs rounded-xl flex items-center gap-1.5 shadow-sm cursor-pointer"
+                >
+                  <Plus className="w-4 h-4" /> Add Exam
+                </button>
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs">
+                  <thead className="bg-slate-50/80 text-slate-500 font-bold border-b border-slate-100 uppercase tracking-wider text-[10px]">
+                    <tr>
+                      <th className="py-3 px-4">Exam Name</th>
+                      <th className="py-3 px-4">Code</th>
+                      <th className="py-3 px-4">Frequency</th>
+                      <th className="py-3 px-4 text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 text-slate-700">
+                    {exams.map((exam) => (
+                      <tr key={exam.id} className="hover:bg-slate-50/70 transition-colors">
+                        <td className="py-3.5 px-4 font-bold text-slate-800">{exam.name}</td>
+                        <td className="py-3.5 px-4 font-mono">{exam.code}</td>
+                        <td className="py-3.5 px-4">{exam.frequency || 'Annual'}</td>
+                        <td className="py-3.5 px-4 text-right space-x-2">
                           <button
                             onClick={() => handleOpenExamModal(exam)}
-                            className="p-1.5 text-slate-400 hover:text-purple-600 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800"
-                            title="Edit Exam"
+                            className="text-blue-600 hover:text-blue-800 font-bold cursor-pointer"
                           >
-                            <Edit className="w-3.5 h-3.5" />
+                            Edit
                           </button>
-                          <Link
-                            to={`/exams/${exam.slug}`}
-                            className="p-1.5 text-slate-400 hover:text-purple-600 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 inline-block"
-                          >
-                            <ExternalLink className="w-3.5 h-3.5" />
-                          </Link>
                           <button
                             onClick={() => handleDeleteExam(exam.id, exam.name)}
-                            className="p-1.5 text-slate-400 hover:text-red-600 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors"
-                            title="Delete Exam"
+                            className="text-rose-600 hover:text-rose-800 font-bold cursor-pointer"
                           >
-                            <Trash2 className="w-3.5 h-3.5" />
+                            Delete
                           </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
-
-        {/* TAB 4: MOCK TESTS MANAGEMENT */}
-        {activeTab === 'tests' && (
-          <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
-            <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-              <div className="relative flex-1 max-w-md">
-                <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Filter mock tests..."
-                  className="w-full pl-9 pr-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white focus:outline-none"
-                />
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
-              <span className="text-xs text-slate-500 font-medium">
-                Showing {filteredTests.length} CBT tests
-              </span>
             </div>
+          )}
 
-            <div className="table-responsive">
-              <table className="w-full min-w-[700px] text-xs text-left border-collapse">
-                <thead className="bg-slate-50 dark:bg-slate-800/60 font-bold text-slate-600 dark:text-slate-300 border-b border-slate-200 dark:border-slate-800">
-                  <tr>
-                    <th className="p-4">Test Title</th>
-                    <th className="p-4">Category</th>
-                    <th className="p-4">Duration / Marks</th>
-                    <th className="p-4">Difficulty</th>
-                    <th className="p-4 text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-slate-800 dark:text-slate-200">
-                  {filteredTests.map((test) => (
-                    <tr key={test.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors">
-                      <td className="p-4 font-bold text-slate-900 dark:text-white">
-                        <Link to={`/mock-tests/${test.slug}`} className="hover:text-emerald-600">
-                          {test.title}
-                        </Link>
-                      </td>
-                      <td className="p-4">
-                        <span className="px-2.5 py-0.5 bg-emerald-50 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 font-bold rounded text-[11px]">
-                          {test.examCategory || test.examName}
-                        </span>
-                      </td>
-                      <td className="p-4 font-semibold">
-                        {test.durationMinutes} Mins • {test.totalMarks} Marks
-                      </td>
-                      <td className="p-4">
-                        <span className="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold rounded text-[10px]">
-                          {test.difficulty}
-                        </span>
-                      </td>
-                      <td className="p-4 text-right">
-                        <div className="inline-flex items-center gap-1.5">
-                          <Link
-                            to={`/mock-tests/${test.slug}`}
-                            className="p-1.5 text-slate-400 hover:text-emerald-600 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800"
-                            title="Run CBT Test"
+          {/* TAB 7: TESTS */}
+          {activeTab === 'tests' && (
+            <div className="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
+              <div className="p-5 border-b border-slate-100 flex items-center justify-between">
+                <div>
+                  <h3 className="font-bold text-base text-slate-800">Mock Tests & CBT Practice</h3>
+                  <p className="text-xs text-slate-400">Total {tests.length} mock tests</p>
+                </div>
+                <button
+                  onClick={() => handleOpenTestModal()}
+                  className="px-3.5 py-2 bg-[#00a8a8] text-white font-bold text-xs rounded-xl flex items-center gap-1.5 shadow-sm cursor-pointer"
+                >
+                  <Plus className="w-4 h-4" /> Create Test
+                </button>
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs">
+                  <thead className="bg-slate-50/80 text-slate-500 font-bold border-b border-slate-100 uppercase tracking-wider text-[10px]">
+                    <tr>
+                      <th className="py-3 px-4">Test Title</th>
+                      <th className="py-3 px-4">Category</th>
+                      <th className="py-3 px-4">Duration</th>
+                      <th className="py-3 px-4">Questions</th>
+                      <th className="py-3 px-4 text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 text-slate-700">
+                    {tests.map((test) => (
+                      <tr key={test.id} className="hover:bg-slate-50/70 transition-colors">
+                        <td className="py-3.5 px-4 font-bold text-slate-800">{test.title}</td>
+                        <td className="py-3.5 px-4">{test.examCategory || 'SSC'}</td>
+                        <td className="py-3.5 px-4">{test.durationMinutes} mins</td>
+                        <td className="py-3.5 px-4 font-bold text-slate-800">{test.totalQuestions} Qs</td>
+                        <td className="py-3.5 px-4 text-right space-x-2">
+                          <button
+                            onClick={() => handleOpenTestModal(test)}
+                            className="text-blue-600 hover:text-blue-800 font-bold cursor-pointer"
                           >
-                            <ExternalLink className="w-3.5 h-3.5" />
-                          </Link>
+                            Edit
+                          </button>
                           <button
                             onClick={() => handleDeleteTest(test.id, test.title)}
-                            className="p-1.5 text-slate-400 hover:text-red-600 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors"
-                            title="Delete Test"
+                            className="text-rose-600 hover:text-rose-800 font-bold cursor-pointer"
                           >
-                            <Trash2 className="w-3.5 h-3.5" />
+                            Delete
                           </button>
-                        </div>
-                      </td>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 8: LOGS */}
+          {activeTab === 'logs' && (
+            <div className="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
+              <div className="p-5 border-b border-slate-100">
+                <h3 className="font-bold text-base text-slate-800">Activity & Audit Trail</h3>
+                <p className="text-xs text-slate-400">Timestamped record of administrative and user actions</p>
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs">
+                  <thead className="bg-slate-50/80 text-slate-500 font-bold border-b border-slate-100 uppercase tracking-wider text-[10px]">
+                    <tr>
+                      <th className="py-3 px-4">Timestamp</th>
+                      <th className="py-3 px-4">Action</th>
+                      <th className="py-3 px-4">Entity</th>
+                      <th className="py-3 px-4">User</th>
+                      <th className="py-3 px-4">Details</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 text-slate-700">
+                    {logs.length === 0 ? (
+                      <tr>
+                        <td colSpan={5} className="py-8 text-center text-slate-400">
+                          No audit logs recorded yet. Actions taken on the dashboard will appear here automatically.
+                        </td>
+                      </tr>
+                    ) : (
+                      logs.map((log) => (
+                        <tr key={log.id} className="hover:bg-slate-50/70 transition-colors">
+                          <td className="py-3 px-4 text-slate-500 font-mono text-[11px]">
+                            {new Date(log.createdAt).toLocaleString()}
+                          </td>
+                          <td className="py-3 px-4 font-bold text-blue-600">{log.action}</td>
+                          <td className="py-3 px-4">{log.entity}</td>
+                          <td className="py-3 px-4 font-medium">{log.userName || log.userEmail || 'Admin'}</td>
+                          <td className="py-3 px-4 text-slate-600 max-w-xs truncate">{log.details || '—'}</td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {/* MODAL 1: JOB ADD / EDIT */}
-        {isJobModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm overflow-y-auto">
-            <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 max-w-2xl w-full border border-slate-200 dark:border-slate-800 shadow-2xl space-y-4 my-8">
-              <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
-                <h3 className="text-lg font-black text-slate-900 dark:text-white">
-                  {editingItem ? 'Edit Government Job Notification' : 'Publish New Recruitment Notification'}
-                </h3>
-                <button onClick={() => setIsJobModalOpen(false)}>
-                  <X className="w-5 h-5 text-slate-400" />
-                </button>
+          {/* TAB 9: SETTINGS */}
+          {activeTab === 'settings' && (
+            <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-xs max-w-3xl space-y-6">
+              <div>
+                <h3 className="font-bold text-base text-slate-800">Platform Settings</h3>
+                <p className="text-xs text-slate-400">Configure global platform options and security credentials</p>
               </div>
 
-              <form onSubmit={handleSaveJob} className="space-y-4 text-xs">
+              <div className="space-y-4 text-xs font-bold text-slate-700">
                 <div>
-                  <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">
-                    Notification Headline *
-                  </label>
+                  <label className="block mb-1">Platform Name</label>
                   <input
                     type="text"
-                    required
-                    value={jobForm.title}
-                    onChange={(e) => setJobForm({ ...jobForm, title: e.target.value })}
-                    placeholder="e.g., SSC CGL 2026 Notification - 17,727 Group B & C Vacancies"
-                    className="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl"
+                    defaultValue="GovtPrep.in"
+                    className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-normal text-sm"
                   />
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div>
-                    <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Organization / Board Name *</label>
-                    <input
-                      type="text"
-                      required
-                      value={jobForm.organizationName}
-                      onChange={(e) => setJobForm({ ...jobForm, organizationName: e.target.value })}
-                      placeholder="e.g., Staff Selection Commission"
-                      className="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl"
-                    />
-                  </div>
-                  <div>
-                    <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Short Code *</label>
-                    <input
-                      type="text"
-                      required
-                      value={jobForm.organizationShortName}
-                      onChange={(e) => setJobForm({ ...jobForm, organizationShortName: e.target.value })}
-                      placeholder="e.g., SSC"
-                      className="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  <div>
-                    <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Post Name *</label>
-                    <input
-                      type="text"
-                      required
-                      value={jobForm.postName}
-                      onChange={(e) => setJobForm({ ...jobForm, postName: e.target.value })}
-                      placeholder="e.g., Assistant Section Officer"
-                      className="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl"
-                    />
-                  </div>
-                  <div>
-                    <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Total Vacancies *</label>
-                    <input
-                      type="number"
-                      required
-                      value={jobForm.totalVacancies}
-                      onChange={(e) => setJobForm({ ...jobForm, totalVacancies: Number(e.target.value) })}
-                      className="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl"
-                    />
-                  </div>
-                  <div>
-                    <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Category</label>
-                    <select
-                      value={jobForm.category}
-                      onChange={(e) => setJobForm({ ...jobForm, category: e.target.value })}
-                      className="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl"
-                    >
-                      <option>Central Govt</option>
-                      <option>Railways</option>
-                      <option>Banking</option>
-                      <option>Defence</option>
-                      <option>Police</option>
-                      <option>Teaching</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div>
-                    <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Application Start Date</label>
-                    <input
-                      type="date"
-                      value={jobForm.startDate}
-                      onChange={(e) => setJobForm({ ...jobForm, startDate: e.target.value })}
-                      className="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl"
-                    />
-                  </div>
-                  <div>
-                    <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Application Last Date *</label>
-                    <input
-                      type="date"
-                      required
-                      value={jobForm.lastDate}
-                      onChange={(e) => setJobForm({ ...jobForm, lastDate: e.target.value })}
-                      className="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl"
-                    />
-                  </div>
-                </div>
-
                 <div>
-                  <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Educational Qualification</label>
+                  <label className="block mb-1">Support Contact Email</label>
                   <input
-                    type="text"
-                    value={jobForm.qualification}
-                    onChange={(e) => setJobForm({ ...jobForm, qualification: e.target.value })}
-                    className="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl"
+                    type="email"
+                    defaultValue="contact@govtprep.in"
+                    className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-normal text-sm"
                   />
                 </div>
 
-                <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
+                <div className="pt-4 border-t border-slate-100 flex items-center justify-end">
                   <button
                     type="button"
-                    onClick={() => setIsJobModalOpen(false)}
-                    className="px-4 py-2 text-slate-500 font-bold"
+                    onClick={() => showToast('success', 'Platform settings saved successfully.')}
+                    className="px-5 py-2.5 bg-[#00a8a8] text-white font-bold rounded-xl shadow-md cursor-pointer"
                   >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={submitting}
-                    className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow transition-colors disabled:opacity-50"
-                  >
-                    {submitting ? 'Saving to Database...' : editingItem ? 'Update Notification' : 'Publish Notification'}
+                    Save Changes
                   </button>
                 </div>
-              </form>
-            </div>
-          </div>
-        )}
-
-        {/* MODAL 2: EXAM ADD / EDIT */}
-        {isExamModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm overflow-y-auto">
-            <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 max-w-xl w-full border border-slate-200 dark:border-slate-800 shadow-2xl space-y-4 my-8">
-              <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
-                <h3 className="text-lg font-black text-slate-900 dark:text-white">
-                  {editingItem ? 'Edit Exam Notification' : 'Add New Competitive Exam'}
-                </h3>
-                <button onClick={() => setIsExamModalOpen(false)}>
-                  <X className="w-5 h-5 text-slate-400" />
-                </button>
               </div>
-
-              <form onSubmit={handleSaveExam} className="space-y-4 text-xs">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div>
-                    <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Exam Name *</label>
-                    <input
-                      type="text"
-                      required
-                      value={examForm.name}
-                      onChange={(e) => setExamForm({ ...examForm, name: e.target.value })}
-                      placeholder="e.g., SSC CGL 2026"
-                      className="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl"
-                    />
-                  </div>
-                  <div>
-                    <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Exam Code *</label>
-                    <input
-                      type="text"
-                      required
-                      value={examForm.code}
-                      onChange={(e) => setExamForm({ ...examForm, code: e.target.value })}
-                      placeholder="e.g., SSC-CGL"
-                      className="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div>
-                    <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Conducting Board</label>
-                    <input
-                      type="text"
-                      value={examForm.organizationName}
-                      onChange={(e) => setExamForm({ ...examForm, organizationName: e.target.value })}
-                      placeholder="Staff Selection Commission"
-                      className="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl"
-                    />
-                  </div>
-                  <div>
-                    <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Frequency</label>
-                    <input
-                      type="text"
-                      value={examForm.frequency}
-                      onChange={(e) => setExamForm({ ...examForm, frequency: e.target.value })}
-                      placeholder="Annually / Twice a Year"
-                      className="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Selection Process</label>
-                  <input
-                    type="text"
-                    value={examForm.selectionProcess}
-                    onChange={(e) => setExamForm({ ...examForm, selectionProcess: e.target.value })}
-                    className="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl"
-                  />
-                </div>
-
-                <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
-                  <button
-                    type="button"
-                    onClick={() => setIsExamModalOpen(false)}
-                    className="px-4 py-2 text-slate-500 font-bold"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={submitting}
-                    className="px-5 py-2.5 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl shadow transition-colors disabled:opacity-50"
-                  >
-                    {submitting ? 'Saving...' : editingItem ? 'Update Exam' : 'Create Exam'}
-                  </button>
-                </div>
-              </form>
             </div>
-          </div>
-        )}
-
-        {/* MODAL 3: MOCK TEST ADD */}
-        {isTestModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm overflow-y-auto">
-            <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 max-w-xl w-full border border-slate-200 dark:border-slate-800 shadow-2xl space-y-4 my-8">
-              <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
-                <h3 className="text-lg font-black text-slate-900 dark:text-white">
-                  Publish New All-India CBT Mock Test
-                </h3>
-                <button onClick={() => setIsTestModalOpen(false)}>
-                  <X className="w-5 h-5 text-slate-400" />
-                </button>
-              </div>
-
-              <form onSubmit={handleSaveTest} className="space-y-4 text-xs">
-                <div>
-                  <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Test Title *</label>
-                  <input
-                    type="text"
-                    required
-                    value={testForm.title}
-                    onChange={(e) => setTestForm({ ...testForm, title: e.target.value })}
-                    placeholder="e.g., SSC CGL Tier-1 Full Length Grand Mock Test 02"
-                    className="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl"
-                  />
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div>
-                    <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Target Exam *</label>
-                    <input
-                      type="text"
-                      required
-                      value={testForm.examName}
-                      onChange={(e) => setTestForm({ ...testForm, examName: e.target.value })}
-                      placeholder="e.g., SSC CGL"
-                      className="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl"
-                    />
-                  </div>
-                  <div>
-                    <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Category</label>
-                    <select
-                      value={testForm.examCategory}
-                      onChange={(e) => setTestForm({ ...testForm, examCategory: e.target.value })}
-                      className="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl"
-                    >
-                      <option>SSC</option>
-                      <option>RAILWAYS</option>
-                      <option>BANKING</option>
-                      <option>UPSC</option>
-                      <option>DEFENCE</option>
-                      <option>STATE_PSC</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  <div>
-                    <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Duration (Mins)</label>
-                    <input
-                      type="number"
-                      value={testForm.durationMinutes}
-                      onChange={(e) => setTestForm({ ...testForm, durationMinutes: Number(e.target.value) })}
-                      className="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl"
-                    />
-                  </div>
-                  <div>
-                    <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Total Marks</label>
-                    <input
-                      type="number"
-                      value={testForm.totalMarks}
-                      onChange={(e) => setTestForm({ ...testForm, totalMarks: Number(e.target.value) })}
-                      className="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl"
-                    />
-                  </div>
-                  <div>
-                    <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">Difficulty</label>
-                    <select
-                      value={testForm.difficulty}
-                      onChange={(e) => setTestForm({ ...testForm, difficulty: e.target.value })}
-                      className="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl"
-                    >
-                      <option>EASY</option>
-                      <option>MODERATE</option>
-                      <option>HARD</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
-                  <button
-                    type="button"
-                    onClick={() => setIsTestModalOpen(false)}
-                    className="px-4 py-2 text-slate-500 font-bold"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={submitting}
-                    className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow transition-colors disabled:opacity-50"
-                  >
-                    {submitting ? 'Creating Test...' : 'Publish Test'}
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
-
+          )}
+        </main>
       </div>
+
+      {/* 5. COURSE MODAL */}
+      {isCourseModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-200">
+            <div className="flex items-center justify-between pb-4 border-b border-slate-100">
+              <h2 className="text-lg font-black text-slate-900">
+                {editingItem ? 'Edit Course' : 'Create New Tech Course'}
+              </h2>
+              <button onClick={() => setIsCourseModalOpen(false)} className="p-1.5 rounded-full hover:bg-slate-100 cursor-pointer">
+                <X className="w-5 h-5 text-slate-500" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveCourse} className="space-y-4 pt-4 text-xs font-bold text-slate-700">
+              <div>
+                <label className="block mb-1">Course Title</label>
+                <input
+                  type="text"
+                  required
+                  value={courseForm.title}
+                  onChange={(e) => setCourseForm({ ...courseForm, title: e.target.value })}
+                  placeholder="e.g. Master Full-Stack Web Development 2026"
+                  className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-normal text-sm"
+                />
+              </div>
+
+              <div>
+                <label className="block mb-1">Description</label>
+                <textarea
+                  required
+                  rows={3}
+                  value={courseForm.description}
+                  onChange={(e) => setCourseForm({ ...courseForm, description: e.target.value })}
+                  placeholder="Comprehensive curriculum details..."
+                  className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-normal text-sm"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block mb-1">Category</label>
+                  <input
+                    type="text"
+                    required
+                    value={courseForm.category}
+                    onChange={(e) => setCourseForm({ ...courseForm, category: e.target.value })}
+                    className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-normal text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block mb-1">Duration (Hours)</label>
+                  <input
+                    type="number"
+                    required
+                    value={courseForm.durationHours}
+                    onChange={(e) => setCourseForm({ ...courseForm, durationHours: Number(e.target.value) })}
+                    className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-normal text-sm"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block mb-1">Skills (comma separated)</label>
+                <input
+                  type="text"
+                  value={courseForm.skills}
+                  onChange={(e) => setCourseForm({ ...courseForm, skills: e.target.value })}
+                  placeholder="React, Node.js, Express, MongoDB"
+                  className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-normal text-sm"
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setIsCourseModalOpen(false)}
+                  className="px-4 py-2 bg-slate-100 rounded-xl text-slate-700 cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="px-5 py-2 bg-[#00a8a8] text-white rounded-xl shadow-md cursor-pointer"
+                >
+                  {submitting ? 'Saving...' : 'Save Course'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* 6. CERTIFICATE MODAL */}
+      {isCertModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl border border-slate-200">
+            <div className="flex items-center justify-between pb-4 border-b border-slate-100">
+              <h2 className="text-lg font-black text-slate-900">Issue Verified Certificate</h2>
+              <button onClick={() => setIsCertModalOpen(false)} className="p-1.5 rounded-full hover:bg-slate-100 cursor-pointer">
+                <X className="w-5 h-5 text-slate-500" />
+              </button>
+            </div>
+
+            <form onSubmit={handleGenerateCertificate} className="space-y-4 pt-4 text-xs font-bold text-slate-700">
+              <div>
+                <label className="block mb-1">Recipient Name</label>
+                <input
+                  type="text"
+                  required
+                  value={certForm.recipientName}
+                  onChange={(e) => setCertForm({ ...certForm, recipientName: e.target.value })}
+                  placeholder="e.g. Rahul Sharma"
+                  className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-normal text-sm"
+                />
+              </div>
+
+              <div>
+                <label className="block mb-1">Course Title</label>
+                <input
+                  type="text"
+                  required
+                  value={certForm.courseTitle}
+                  onChange={(e) => setCertForm({ ...certForm, courseTitle: e.target.value })}
+                  className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-normal text-sm"
+                />
+              </div>
+
+              <div>
+                <label className="block mb-1">Grade</label>
+                <select
+                  value={certForm.grade}
+                  onChange={(e) => setCertForm({ ...certForm, grade: e.target.value })}
+                  className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-normal text-sm"
+                >
+                  <option value="Distinction">Distinction (Grade A+)</option>
+                  <option value="Excellence">Excellence (Grade A)</option>
+                  <option value="Passed">Passed (Grade B)</option>
+                </select>
+              </div>
+
+              <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setIsCertModalOpen(false)}
+                  className="px-4 py-2 bg-slate-100 rounded-xl text-slate-700 cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="px-5 py-2 bg-[#00a8a8] text-white rounded-xl shadow-md cursor-pointer"
+                >
+                  {submitting ? 'Issuing...' : 'Generate Certificate'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* 7. JOB MODAL */}
+      {isJobModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-200">
+            <div className="flex items-center justify-between pb-4 border-b border-slate-100">
+              <h2 className="text-lg font-black text-slate-900">
+                {editingItem ? 'Edit Job Notification' : 'Publish New Sarkari Vacancy'}
+              </h2>
+              <button onClick={() => setIsJobModalOpen(false)} className="p-1.5 rounded-full hover:bg-slate-100 cursor-pointer">
+                <X className="w-5 h-5 text-slate-500" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveJob} className="space-y-4 pt-4 text-xs font-bold text-slate-700">
+              <div>
+                <label className="block mb-1">Job Title</label>
+                <input
+                  type="text"
+                  required
+                  value={jobForm.title}
+                  onChange={(e) => setJobForm({ ...jobForm, title: e.target.value })}
+                  placeholder="e.g. SSC CGL 2026 Combined Graduate Level"
+                  className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-normal text-sm"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block mb-1">Board / Organization</label>
+                  <input
+                    type="text"
+                    required
+                    value={jobForm.organizationName}
+                    onChange={(e) => setJobForm({ ...jobForm, organizationName: e.target.value })}
+                    placeholder="Staff Selection Commission"
+                    className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-normal text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block mb-1">Total Vacancies</label>
+                  <input
+                    type="number"
+                    required
+                    value={jobForm.totalVacancies}
+                    onChange={(e) => setJobForm({ ...jobForm, totalVacancies: Number(e.target.value) })}
+                    className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-normal text-sm"
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setIsJobModalOpen(false)}
+                  className="px-4 py-2 bg-slate-100 rounded-xl text-slate-700 cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="px-5 py-2 bg-[#00a8a8] text-white rounded-xl shadow-md cursor-pointer"
+                >
+                  {submitting ? 'Saving...' : 'Save Job'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* 8. MOCK TEST MODAL */}
+      {isTestModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-lg w-full shadow-2xl border border-slate-200">
+            <div className="flex items-center justify-between pb-4 border-b border-slate-100">
+              <h2 className="text-lg font-black text-slate-900">
+                {editingItem ? 'Edit Mock Test' : 'Create New Mock Test CBT'}
+              </h2>
+              <button onClick={() => setIsTestModalOpen(false)} className="p-1.5 rounded-full hover:bg-slate-100 cursor-pointer">
+                <X className="w-5 h-5 text-slate-500" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveTest} className="space-y-4 pt-4 text-xs font-bold text-slate-700">
+              <div>
+                <label className="block mb-1">Test Title</label>
+                <input
+                  type="text"
+                  required
+                  value={testForm.title}
+                  onChange={(e) => setTestForm({ ...testForm, title: e.target.value })}
+                  placeholder="e.g. SSC CGL Tier-1 Full Length Mock 01"
+                  className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-normal text-sm"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block mb-1">Duration (Minutes)</label>
+                  <input
+                    type="number"
+                    required
+                    value={testForm.durationMinutes}
+                    onChange={(e) => setTestForm({ ...testForm, durationMinutes: Number(e.target.value) })}
+                    className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-normal text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block mb-1">Total Marks</label>
+                  <input
+                    type="number"
+                    required
+                    value={testForm.totalMarks}
+                    onChange={(e) => setTestForm({ ...testForm, totalMarks: Number(e.target.value) })}
+                    className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-normal text-sm"
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setIsTestModalOpen(false)}
+                  className="px-4 py-2 bg-slate-100 rounded-xl text-slate-700 cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="px-5 py-2 bg-[#00a8a8] text-white rounded-xl shadow-md cursor-pointer"
+                >
+                  {submitting ? 'Saving...' : 'Save Mock Test'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* 9. EXAM MODAL */}
+      {isExamModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-lg w-full shadow-2xl border border-slate-200">
+            <div className="flex items-center justify-between pb-4 border-b border-slate-100">
+              <h2 className="text-lg font-black text-slate-900">
+                {editingItem ? 'Edit Exam Board' : 'Add Examination Board'}
+              </h2>
+              <button onClick={() => setIsExamModalOpen(false)} className="p-1.5 rounded-full hover:bg-slate-100 cursor-pointer">
+                <X className="w-5 h-5 text-slate-500" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveExam} className="space-y-4 pt-4 text-xs font-bold text-slate-700">
+              <div>
+                <label className="block mb-1">Exam Name</label>
+                <input
+                  type="text"
+                  required
+                  value={examForm.name}
+                  onChange={(e) => setExamForm({ ...examForm, name: e.target.value })}
+                  placeholder="e.g. UPSC Civil Services Exam (CSE)"
+                  className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-normal text-sm"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block mb-1">Exam Code</label>
+                  <input
+                    type="text"
+                    required
+                    value={examForm.code}
+                    onChange={(e) => setExamForm({ ...examForm, code: e.target.value })}
+                    placeholder="UPSC-CSE"
+                    className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-normal text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block mb-1">Conducting Board</label>
+                  <input
+                    type="text"
+                    required
+                    value={examForm.organizationName}
+                    onChange={(e) => setExamForm({ ...examForm, organizationName: e.target.value })}
+                    placeholder="Union Public Service Commission"
+                    className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-normal text-sm"
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setIsExamModalOpen(false)}
+                  className="px-4 py-2 bg-slate-100 rounded-xl text-slate-700 cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="px-5 py-2 bg-[#00a8a8] text-white rounded-xl shadow-md cursor-pointer"
+                >
+                  {submitting ? 'Saving...' : 'Save Exam'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

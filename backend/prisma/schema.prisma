@@ -239,3 +239,57 @@ model Certificate {
   createdAt       DateTime @default(now())
 }
 
+model ActivityLog {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String?
+  userName  String?
+  userEmail String?
+  action    String
+  entity    String
+  entityId  String?
+  details   String?
+  ipAddress String?
+  createdAt DateTime @default(now())
+}
+
+model Announcement {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  title       String
+  content     String
+  type        String   @default("INFO") // INFO, WARNING, URGENT, SUCCESS
+  priority    Int      @default(1)
+  isPublished Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Faq {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  question    String
+  answer      String
+  category    String   @default("GENERAL") // GENERAL, EXAMS, JOBS, COURSES
+  order       Int      @default(0)
+  isPublished Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model PlatformSetting {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  key         String   @unique
+  value       String
+  category    String   @default("GENERAL")
+  description String?
+  updatedAt   DateTime @updatedAt
+}
+
+model Category {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  name      String
+  slug      String   @unique
+  type      String   @default("JOB") // JOB, EXAM, COURSE
+  icon      String?
+  createdAt DateTime @default(now())
+}
+
+

@@ -165,10 +165,66 @@ export const adminApi = {
     });
   },
 
+  async updateTest(id: string, testData: any) {
+    return apiRequest<any>(`/admin/tests/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(testData),
+    });
+  },
+
   async deleteTest(id: string) {
     return apiRequest<any>(`/admin/tests/${id}`, {
       method: 'DELETE',
     });
+  },
+
+  // Courses CRUD
+  async getCourses() {
+    return apiRequest<any[]>('/admin/courses');
+  },
+
+  async createCourse(courseData: any) {
+    return apiRequest<any>('/admin/courses', {
+      method: 'POST',
+      body: JSON.stringify(courseData),
+    });
+  },
+
+  async updateCourse(id: string, courseData: any) {
+    return apiRequest<any>(`/admin/courses/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(courseData),
+    });
+  },
+
+  async deleteCourse(id: string) {
+    return apiRequest<any>(`/admin/courses/${id}`, {
+      method: 'DELETE',
+    });
+  },
+
+  // Certificates CRUD
+  async getCertificates(search?: string) {
+    const query = search ? `?search=${encodeURIComponent(search)}` : '';
+    return apiRequest<any[]>(`/admin/certificates${query}`);
+  },
+
+  async generateCertificate(data: any) {
+    return apiRequest<any>('/admin/certificates/generate', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+
+  async deleteCertificate(id: string) {
+    return apiRequest<any>(`/admin/certificates/${id}`, {
+      method: 'DELETE',
+    });
+  },
+
+  // Activity Logs
+  async getLogs() {
+    return apiRequest<any[]>('/admin/logs');
   },
 };
 

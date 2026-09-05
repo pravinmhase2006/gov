@@ -235,7 +235,7 @@ export default function MockTestEngine({ test, userId }: MockTestEngineProps) {
           
           <div className="flex items-center gap-2 sm:gap-3 max-w-[60%] sm:max-w-none truncate">
             <span className="bg-blue-600 text-white text-[10px] sm:text-xs font-black px-2 py-0.5 sm:py-1 rounded shrink-0">
-              {test.exam.category}
+              {test.exam?.category || 'MOCK TEST'}
             </span>
             <h1 className="text-xs sm:text-base font-bold truncate text-slate-100">
               {test.title}
