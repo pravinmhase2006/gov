@@ -9,6 +9,7 @@ import LiveTicker from '@/components/layout/LiveTicker';
 import AspirantAIAssistant from '@/components/common/AspirantAIAssistant';
 import ErrorBoundary from '@/components/common/ErrorBoundary';
 import PageLoader from '@/components/common/PageLoader';
+import ProtectedRoute from '@/components/common/ProtectedRoute';
 
 // Code-Split Lazy Loaded Pages
 const HomePage = lazy(() => import('@/pages/HomePage'));
@@ -177,10 +178,39 @@ export default function App() {
               {/* Authentication & User Accounts */}
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
-              <Route path="/dashboard" element={<DashboardPage />} />
-              <Route path="/dashboard/*" element={<DashboardPage />} />
-              <Route path="/admin" element={<AdminPage />} />
-              <Route path="/admin/*" element={<AdminPage />} />
+              <Route
+                path="/dashboard"
+                element={
+                  <ProtectedRoute>
+                    <DashboardPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/dashboard/*"
+                element={
+                  <ProtectedRoute>
+                    <DashboardPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin"
+                element={
+                  <ProtectedRoute requireAdmin={true}>
+                    <AdminPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/*"
+                element={
+                  <ProtectedRoute requireAdmin={true}>
+                    <AdminPage />
+                  </ProtectedRoute>
+                }
+              />
+
 
               {/* Information & Legal */}
               <Route path="/search" element={<SearchPage />} />

@@ -13,6 +13,7 @@ export interface ExamCardData {
   upcomingDate?: string | null;
   description?: string | null;
   isPopular?: boolean;
+  totalApplicants?: string;
 }
 
 export interface SyllabusItem {

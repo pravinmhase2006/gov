@@ -1,44 +1,50 @@
 import React, { useState } from 'react';
 import Link from '@/components/common/Link';
 import { useNavigate } from '@/lib/navigation';
-import { authService } from '@/services/api';
-import { LogIn, Lock, Mail, AlertCircle, ArrowRight, ShieldCheck } from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
+import { LogIn, Lock, Mail, AlertCircle, ArrowRight, ShieldCheck, CheckCircle2, Loader2 } from 'lucide-react';
 
 export default function LoginPage() {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [successMsg, setSuccessMsg] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setSuccessMsg('');
+
+    if (!email.trim() || !password) {
+      setError('Please provide both email and password.');
+      return;
+    }
+
     setLoading(true);
 
-    // Mock/Real login handler
-    setTimeout(() => {
-      if (email === 'admin@govtprep.in' && password === 'Admin@123') {
-        authService.setUser(
-          { id: 'usr-admin', name: 'GovtPrep Administrator', email, role: 'ADMIN' },
-          'mock_jwt_token_admin_2026'
-        );
-        navigate('/admin');
-      } else if (email && password) {
-        authService.setUser(
-          { id: 'usr-aspirant', name: 'Aspirant Rahul', email, role: 'USER' },
-          'mock_jwt_token_aspirant_2026'
-        );
-        navigate('/dashboard');
-      } else {
-        setError('Please enter valid credentials.');
-      }
+    try {
+      const loggedInUser = await login(email.trim(), password);
+      setSuccessMsg(`Welcome back, ${loggedInUser.name || loggedInUser.email}! Redirecting...`);
+      setTimeout(() => {
+        if (loggedInUser.role === 'ADMIN') {
+          navigate('/admin');
+        } else {
+          navigate('/dashboard');
+        }
+      }, 600);
+    } catch (err: any) {
+      console.error('Authentication error:', err);
+      setError(err.message || 'Login failed. Please verify your credentials and try again.');
+    } finally {
       setLoading(false);
-    }, 600);
+    }
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md text-center space-y-2">
         <Link to="/" className="inline-flex items-center gap-2 font-black text-2xl text-slate-900 dark:text-white">
           <div className="w-9 h-9 rounded-xl bg-blue-600 text-white flex items-center justify-center font-black">
@@ -58,9 +64,16 @@ export default function LoginPage() {
         <div className="bg-white dark:bg-slate-900 py-8 px-6 shadow-xl rounded-3xl border border-slate-200 dark:border-slate-800 sm:px-10">
           <form className="space-y-4" onSubmit={handleSubmit}>
             {error && (
-              <div className="p-3 bg-red-50 dark:bg-red-950/40 border border-red-200 text-red-700 text-xs rounded-xl flex items-center gap-2">
+              <div className="p-3.5 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/50 text-red-700 dark:text-red-300 text-xs rounded-xl flex items-center gap-2">
                 <AlertCircle className="w-4 h-4 shrink-0" />
                 <span>{error}</span>
+              </div>
+            )}
+
+            {successMsg && (
+              <div className="p-3.5 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900/50 text-emerald-700 dark:text-emerald-300 text-xs rounded-xl flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 shrink-0" />
+                <span>{successMsg}</span>
               </div>
             )}
 
@@ -75,7 +88,7 @@ export default function LoginPage() {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="aspirant@govtprep.in"
+                  placeholder="admin@govtprep.in or aspirant@govtprep.in"
                   className="w-full pl-10 pr-4 py-2.5 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none"
                 />
               </div>
@@ -103,16 +116,25 @@ export default function LoginPage() {
               disabled={loading}
               className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-black text-sm rounded-xl shadow-md transition-all flex items-center justify-center gap-2 disabled:opacity-50"
             >
-              {loading ? 'Authenticating...' : 'Sign In to Account'}
-              <ArrowRight className="w-4 h-4" />
+              {loading ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span>Authenticating...</span>
+                </>
+              ) : (
+                <>
+                  <span>Sign In to Account</span>
+                  <ArrowRight className="w-4 h-4" />
+                </>
+              )}
             </button>
           </form>
 
           {/* Quick Demo Credentials Tip */}
           <div className="mt-6 p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 text-[11px] text-slate-500 space-y-1">
-            <p className="font-bold text-slate-700 dark:text-slate-300">🔑 Demo Access Credentials:</p>
-            <p>Candidate: <code className="text-blue-600 font-bold">aspirant@govtprep.in</code> / <code className="text-blue-600 font-bold">User@123</code></p>
-            <p>Admin: <code className="text-purple-600 font-bold">admin@govtprep.in</code> / <code className="text-purple-600 font-bold">Admin@123</code></p>
+            <p className="font-bold text-slate-700 dark:text-slate-300">🔑 Verified Database Credentials:</p>
+            <p>Admin: <code className="text-purple-600 dark:text-purple-400 font-bold">admin@govtprep.in</code> / <code className="text-purple-600 dark:text-purple-400 font-bold">Admin@123</code></p>
+            <p>Candidate: <code className="text-blue-600 dark:text-blue-400 font-bold">aspirant@govtprep.in</code> / <code className="text-blue-600 dark:text-blue-400 font-bold">User@123</code></p>
           </div>
 
           <div className="mt-6 text-center text-xs text-slate-500">
@@ -126,3 +148,4 @@ export default function LoginPage() {
     </div>
   );
 }
+

@@ -124,30 +124,30 @@ export default function TypingTest() {
 
       {/* Real-Time Metrics Bar */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 print:hidden">
-        <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm text-center">
-          <span className="text-xs font-bold text-slate-500 block">Time Left</span>
-          <span className="text-2xl sm:text-3xl font-black text-blue-600 mt-1 block">
+        <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm text-center">
+          <span className="text-xs font-bold text-slate-500 dark:text-slate-400 block">Time Left</span>
+          <span className="text-2xl sm:text-3xl font-black text-blue-600 dark:text-blue-400 mt-1 block">
             {Math.floor(timeLeft / 60)}:{String(timeLeft % 60).padStart(2, '0')}
           </span>
         </div>
 
-        <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm text-center">
-          <span className="text-xs font-bold text-slate-500 block">Net Speed</span>
-          <span className="text-2xl sm:text-3xl font-black text-slate-900 mt-1 block">
+        <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm text-center">
+          <span className="text-xs font-bold text-slate-500 dark:text-slate-400 block">Net Speed</span>
+          <span className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white mt-1 block">
             {netWPM} <span className="text-xs font-bold text-slate-400">WPM</span>
           </span>
         </div>
 
-        <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm text-center">
-          <span className="text-xs font-bold text-slate-500 block">Accuracy</span>
-          <span className="text-2xl sm:text-3xl font-black text-emerald-600 mt-1 block">
+        <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm text-center">
+          <span className="text-xs font-bold text-slate-500 dark:text-slate-400 block">Accuracy</span>
+          <span className="text-2xl sm:text-3xl font-black text-emerald-600 dark:text-emerald-400 mt-1 block">
             {accuracy}%
           </span>
         </div>
 
-        <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm text-center">
-          <span className="text-xs font-bold text-slate-500 block">Key Depressions</span>
-          <span className="text-2xl sm:text-3xl font-black text-purple-600 mt-1 block">
+        <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm text-center">
+          <span className="text-xs font-bold text-slate-500 dark:text-slate-400 block">Key Depressions</span>
+          <span className="text-2xl sm:text-3xl font-black text-purple-600 dark:text-purple-400 mt-1 block">
             {totalCharsTyped} <span className="text-xs font-bold text-slate-400">strokes</span>
           </span>
         </div>
@@ -155,14 +155,16 @@ export default function TypingTest() {
 
       {/* Typing Workspace */}
       {!isFinished ? (
-        <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm space-y-6 print:hidden">
+        <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-6 sm:p-8 shadow-sm space-y-6 print:hidden">
           
           {/* Reference Passage Display */}
-          <div className="p-5 bg-slate-50 rounded-2xl border border-slate-200 text-sm sm:text-base leading-relaxed font-mono select-none text-slate-700">
+          <div className="p-5 bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700 text-sm sm:text-base leading-relaxed font-mono select-none text-slate-700 dark:text-slate-200">
             {passage.split('').map((char, index) => {
-              let colorClass = 'text-slate-700';
+              let colorClass = 'text-slate-700 dark:text-slate-300';
               if (index < userInput.length) {
-                colorClass = userInput[index] === char ? 'text-emerald-700 bg-emerald-100/70 font-bold' : 'text-rose-700 bg-rose-200 font-bold';
+                colorClass = userInput[index] === char
+                  ? 'text-emerald-700 dark:text-emerald-300 bg-emerald-100/70 dark:bg-emerald-950/60 font-bold'
+                  : 'text-rose-700 dark:text-rose-300 bg-rose-200 dark:bg-rose-950/60 font-bold';
               }
               return (
                 <span key={index} className={colorClass}>
@@ -181,10 +183,10 @@ export default function TypingTest() {
               onChange={(e) => setUserInput(e.target.value)}
               placeholder={isActive ? "Start typing the passage above..." : "Click 'Start Typing Test' below to begin..."}
               rows={4}
-              className="w-full bg-slate-50 border-2 border-slate-200 rounded-2xl p-4 text-sm sm:text-base font-mono focus:bg-white focus:border-blue-600 focus:outline-none transition-all disabled:opacity-50"
+              className="w-full bg-slate-50 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-2xl p-4 text-sm sm:text-base font-mono text-slate-900 dark:text-white focus:bg-white dark:focus:bg-slate-900 focus:border-blue-600 focus:outline-none transition-all disabled:opacity-50"
             />
 
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
               <div className="flex items-center gap-2">
                 {!isActive ? (
                   <button
@@ -207,7 +209,7 @@ export default function TypingTest() {
 
                 <button
                   onClick={handleReset}
-                  className="p-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl transition-colors"
+                  className="p-2.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl transition-colors"
                   title="Reset test"
                 >
                   <RotateCcw className="w-4 h-4" />
@@ -227,25 +229,25 @@ export default function TypingTest() {
           <div className="flex items-center justify-end gap-3 print:hidden">
             <button
               onClick={handleReset}
-              className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl transition-colors"
+              className="px-4 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold text-xs rounded-xl transition-colors"
             >
               Try Again
             </button>
             <button
               onClick={() => window.print()}
-              className="inline-flex items-center gap-2 px-5 py-2 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl shadow-sm transition-colors"
+              className="inline-flex items-center gap-2 px-5 py-2 bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-white text-white dark:text-slate-900 font-bold text-xs rounded-xl shadow-sm transition-colors"
             >
               <Printer className="w-4 h-4" />
               <span>Print Typing Certificate</span>
             </button>
           </div>
 
-          <div className="bg-white border-4 border-double border-slate-300 rounded-3xl p-8 sm:p-12 shadow-md text-slate-900 space-y-6 print:m-0 print:border-2">
-            <div className="text-center space-y-2 border-b-2 border-slate-200 pb-6">
-              <span className="text-xs font-bold text-blue-600 uppercase tracking-widest">
+          <div className="bg-white dark:bg-slate-900 border-4 border-double border-slate-300 dark:border-slate-700 rounded-3xl p-8 sm:p-12 shadow-md text-slate-900 dark:text-white space-y-6 print:m-0 print:border-2">
+            <div className="text-center space-y-2 border-b-2 border-slate-200 dark:border-slate-800 pb-6">
+              <span className="text-xs font-bold text-blue-600 dark:text-blue-400 uppercase tracking-widest">
                 GovtPrep &amp; TechPrep India Examination Cell
               </span>
-              <h2 className="text-2xl sm:text-3xl font-black uppercase text-slate-900">
+              <h2 className="text-2xl sm:text-3xl font-black uppercase text-slate-900 dark:text-white">
                 Typing Skill Proficiency Certificate
               </h2>
               <p className="text-xs text-slate-500 italic">
@@ -254,54 +256,55 @@ export default function TypingTest() {
             </div>
 
             <div className="text-center space-y-2 py-4">
-              <p className="text-xs text-slate-600">This is to certify that candidate</p>
-              <h3 className="text-xl font-black text-slate-900 border-b border-dashed border-slate-400 inline-block px-6 pb-1">
+              <p className="text-xs text-slate-600 dark:text-slate-400">This is to certify that candidate</p>
+              <h3 className="text-xl font-black text-slate-900 dark:text-white border-b border-dashed border-slate-400 inline-block px-6 pb-1">
                 {candidateName}
               </h3>
-              <p className="text-xs text-slate-600 pt-1">
+              <p className="text-xs text-slate-600 dark:text-slate-400 pt-1">
                 has successfully appeared in the simulated English Data Entry Speed Test (DEST).
               </p>
             </div>
 
             {/* Performance Metric Grid */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 py-4 text-center">
-              <div className="bg-blue-50 p-4 rounded-2xl border border-blue-100">
-                <span className="text-xs text-blue-700 font-bold block">Net Speed</span>
-                <span className="text-3xl font-black text-blue-900 mt-1 block">{netWPM} WPM</span>
+              <div className="bg-blue-50 dark:bg-blue-950/40 p-4 rounded-2xl border border-blue-100 dark:border-blue-900/50">
+                <span className="text-xs text-blue-700 dark:text-blue-300 font-bold block">Net Speed</span>
+                <span className="text-3xl font-black text-blue-900 dark:text-blue-100 mt-1 block">{netWPM} WPM</span>
               </div>
 
-              <div className="bg-emerald-50 p-4 rounded-2xl border border-emerald-100">
-                <span className="text-xs text-emerald-700 font-bold block">Accuracy</span>
-                <span className="text-3xl font-black text-emerald-900 mt-1 block">{accuracy}%</span>
+              <div className="bg-emerald-50 dark:bg-emerald-950/40 p-4 rounded-2xl border border-emerald-100 dark:border-emerald-900/50">
+                <span className="text-xs text-emerald-700 dark:text-emerald-300 font-bold block">Accuracy</span>
+                <span className="text-3xl font-black text-emerald-900 dark:text-emerald-100 mt-1 block">{accuracy}%</span>
               </div>
 
-              <div className="bg-purple-50 p-4 rounded-2xl border border-purple-100">
-                <span className="text-xs text-purple-700 font-bold block">Key Depressions</span>
-                <span className="text-3xl font-black text-purple-900 mt-1 block">{totalCharsTyped}</span>
+              <div className="bg-purple-50 dark:bg-purple-950/40 p-4 rounded-2xl border border-purple-100 dark:border-purple-900/50">
+                <span className="text-xs text-purple-700 dark:text-purple-300 font-bold block">Key Depressions</span>
+                <span className="text-3xl font-black text-purple-900 dark:text-purple-100 mt-1 block">{totalCharsTyped}</span>
               </div>
 
-              <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200">
-                <span className="text-xs text-slate-700 font-bold block">SSC DEST Status</span>
-                <span className={`text-xl font-black mt-2 block ${isSscQualified ? 'text-emerald-600' : 'text-rose-600'}`}>
+              <div className="bg-slate-50 dark:bg-slate-800/60 p-4 rounded-2xl border border-slate-200 dark:border-slate-700">
+                <span className="text-xs text-slate-700 dark:text-slate-300 font-bold block">SSC DEST Status</span>
+                <span className={`text-xl font-black mt-2 block ${isSscQualified ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
                   {isSscQualified ? 'QUALIFIED ✓' : 'NOT QUALIFIED'}
                 </span>
               </div>
             </div>
 
             {/* Verification Footer */}
-            <div className="pt-6 border-t border-slate-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-xs text-slate-500">
+            <div className="pt-6 border-t border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-xs text-slate-500">
               <div>
-                <p className="font-bold text-slate-800">Certificate ID: TYP-{Date.now().toString().slice(-8)}</p>
+                <p className="font-bold text-slate-800 dark:text-slate-200">Certificate ID: TYP-{Date.now().toString().slice(-8)}</p>
                 <p>Date of Evaluation: {new Date().toLocaleDateString('en-IN')}</p>
               </div>
               <div className="text-left sm:text-right">
                 <div className="border-b border-slate-500 w-36 mb-1"></div>
-                <span className="font-bold">Authorized Examiner</span>
+                <span className="font-bold text-slate-800 dark:text-slate-200">Authorized Examiner</span>
               </div>
             </div>
           </div>
         </div>
       )}
+
 
     </div>
   );

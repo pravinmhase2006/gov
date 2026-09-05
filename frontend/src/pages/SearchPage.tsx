@@ -7,7 +7,7 @@ import { dataService, Job, Exam, TechJob } from '@/services/dataService';
 import { Search, Sparkles } from 'lucide-react';
 
 export default function SearchPage() {
-  const [searchParams] = useSearchParams();
+  const searchParams = useSearchParams();
   const initialQuery = searchParams.get('q') || '';
   const [query, setQuery] = useState(initialQuery);
   const [results, setResults] = useState<{ jobs: Job[]; exams: Exam[]; techJobs: TechJob[] }>({

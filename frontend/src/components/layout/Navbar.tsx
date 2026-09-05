@@ -29,18 +29,14 @@ import {
 } from 'lucide-react';
 
 import ThemeToggle from '@/components/common/ThemeToggle';
+import { useAuth } from '@/context/AuthContext';
 
 interface NavbarProps {
-  initialUser?: {
-    id: string;
-    name: string;
-    email: string;
-    role: string;
-  } | null;
+  initialUser?: any;
 }
 
 export default function Navbar({ initialUser = null }: NavbarProps) {
-  const [user, setUser] = useState(initialUser);
+  const { user, logout } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
@@ -77,14 +73,10 @@ export default function Navbar({ initialUser = null }: NavbarProps) {
   };
 
   const handleLogout = async () => {
-    try {
-      await fetch('/api/auth/logout', { method: 'POST' });
-    } catch (e) {
-      console.error(e);
-    }
-    setUser(null);
+    await logout();
     router.push('/');
   };
+
 
   return (
     <header ref={navRef} className="sticky top-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 shadow-sm transition-colors">

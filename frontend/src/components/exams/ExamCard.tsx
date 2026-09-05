@@ -48,6 +48,12 @@ export default function ExamCard({ exam }: ExamCardProps) {
               <span className="font-bold text-blue-600 dark:text-blue-400">{exam.upcomingDate}</span>
             </div>
           )}
+          {exam.totalApplicants && !exam.upcomingDate && (
+            <div className="flex items-center justify-between">
+              <span className="text-slate-500 dark:text-slate-400">Applicants:</span>
+              <span className="font-semibold text-slate-800 dark:text-slate-200">{exam.totalApplicants}</span>
+            </div>
+          )}
         </div>
       </div>
 
