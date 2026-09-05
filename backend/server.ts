@@ -9,6 +9,7 @@ import techRoutes from './routes/techRoutes.js';
 import contentRoutes from './routes/contentRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
 import docsRoutes from './routes/docsRoutes.js';
+import courseRoutes from './routes/courseRoutes.js';
 
 dotenv.config();
 
@@ -41,6 +42,7 @@ app.use('/api/jobs', jobRoutes);
 app.use('/api/exams', examRoutes);
 app.use('/api/tests', testRoutes);
 app.use('/api/tech-jobs', techRoutes);
+app.use('/api/courses', courseRoutes);
 app.use('/api/content', contentRoutes);
 
 

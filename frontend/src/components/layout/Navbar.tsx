@@ -371,17 +371,38 @@ export default function Navbar({ initialUser = null }: NavbarProps) {
                         </Link>
                       </li>
                       <li>
-                        <Link href="/tech-courses" className="p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center gap-2.5 block">
+                        <Link href="/courses" className="p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center gap-2.5 block">
                           <span className="text-base">🎓</span>
                           <div>
-                            <p className="font-semibold text-slate-900 dark:text-slate-100">Tech Skill Courses</p>
-                            <p className="text-[11px] text-slate-500">Free & certified industry roadmaps</p>
+                            <p className="font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
+                              <span>Free IT Courses</span>
+                              <span className="text-[9px] bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-300 font-bold px-1.5 py-0.2 rounded border border-purple-300">CERTIFIED</span>
+                            </p>
+                            <p className="text-[11px] text-slate-500">Python, React, Java, AI/ML, Cloud & DSA</p>
                           </div>
                         </Link>
                       </li>
                     </ul>
                   </div>
                 )}
+              </li>
+
+              {/* Free IT Courses Dedicated Nav Link */}
+              <li>
+                <Link
+                  href="/courses"
+                  className={`px-3 py-2 flex items-center gap-1.5 rounded-md transition-colors ${
+                    pathname.startsWith('/courses') || pathname.startsWith('/tech-courses')
+                      ? 'bg-purple-50 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300 font-bold'
+                      : 'text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-purple-600 dark:hover:text-purple-400'
+                  }`}
+                >
+                  <BookOpen className="w-3.5 h-3.5 text-purple-500" />
+                  <span>Free IT Courses</span>
+                  <span className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-[9px] px-1.5 py-0.5 rounded-full font-black tracking-wide shadow-xs">
+                    FREE
+                  </span>
+                </Link>
               </li>
 
               {/* Exams & Mock Tests */}

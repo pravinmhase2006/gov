@@ -24,6 +24,8 @@ const MockTestsPage = lazy(() => import('@/pages/MockTestsPage'));
 const MockTestRunPage = lazy(() => import('@/pages/MockTestRunPage'));
 const TechJobsPage = lazy(() => import('@/pages/TechJobsPage'));
 const TechCoursesPage = lazy(() => import('@/pages/TechCoursesPage'));
+const CourseClassroomPage = lazy(() => import('@/pages/CourseClassroomPage'));
+const CertificateViewPage = lazy(() => import('@/pages/CertificateViewPage'));
 const InternshipsPage = lazy(() => import('@/pages/InternshipsPage'));
 const CurrentAffairsPage = lazy(() => import('@/pages/CurrentAffairsPage'));
 const SyllabusPage = lazy(() => import('@/pages/SyllabusPage'));
@@ -142,11 +144,15 @@ export default function App() {
               <Route path="/mock-tests" element={<MockTestsPage />} />
               <Route path="/mock-tests/:slug" element={<MockTestRunPage />} />
 
-              {/* Tech Careers & Internships */}
+              {/* Tech Careers, Free IT Courses & Internships */}
               <Route path="/tech-jobs" element={<TechJobsPage />} />
               <Route path="/tech-jobs/:slug" element={<TechJobsPage />} />
+              <Route path="/courses" element={<TechCoursesPage />} />
+              <Route path="/courses/:slug" element={<CourseClassroomPage />} />
               <Route path="/tech-courses" element={<TechCoursesPage />} />
-              <Route path="/tech-courses/:slug" element={<TechCoursesPage />} />
+              <Route path="/tech-courses/:slug" element={<CourseClassroomPage />} />
+              <Route path="/certificates/:code" element={<CertificateViewPage />} />
+              <Route path="/certificate/:code" element={<CertificateViewPage />} />
               <Route path="/internships" element={<InternshipsPage />} />
               <Route path="/internships/:slug" element={<InternshipsPage />} />
 

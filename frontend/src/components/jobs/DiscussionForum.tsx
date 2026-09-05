@@ -13,11 +13,12 @@ interface Comment {
 }
 
 interface DiscussionForumProps {
-  itemTitle: string;
+  jobId?: string;
+  itemTitle?: string;
   itemType?: 'job' | 'exam';
 }
 
-export default function DiscussionForum({ itemTitle, itemType = 'job' }: DiscussionForumProps) {
+export default function DiscussionForum({ jobId, itemTitle = 'Community Discussion', itemType = 'job' }: DiscussionForumProps) {
   const [selectedPoll, setSelectedPoll] = useState<string | null>(null);
   const [hasVoted, setHasVoted] = useState(false);
   const [pollVotes, setPollVotes] = useState({

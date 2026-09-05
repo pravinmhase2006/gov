@@ -22,26 +22,91 @@ export interface TechJobData {
   createdAt?: Date | string;
 }
 
+export interface LessonQuizQuestion {
+  id: string;
+  question: string;
+  options: string[];
+  answer: number;
+  explanation?: string | null;
+}
+
+export interface CourseLesson {
+  id: string;
+  title: string;
+  duration: string;
+  videoUrl?: string | null;
+  summary?: string | null;
+  content?: string | null;
+  codeSnippet?: string | null;
+  quiz?: LessonQuizQuestion[];
+}
+
+export interface CourseModule {
+  id: string;
+  title: string;
+  description?: string | null;
+  lessons: CourseLesson[];
+}
+
+export interface CourseEnrollment {
+  id: string;
+  userId: string;
+  userName: string;
+  userEmail?: string | null;
+  courseId: string;
+  courseSlug: string;
+  completedLessonIds: string[];
+  progressPercent: number;
+  isCompleted: boolean;
+  completedAt?: string | null;
+  certificateCode?: string | null;
+  createdAt: string;
+}
+
+export interface CertificateData {
+  id: string;
+  certificateCode: string;
+  courseId: string;
+  courseTitle: string;
+  recipientName: string;
+  recipientEmail?: string | null;
+  userId?: string | null;
+  issueDate: string;
+  grade: string;
+  skills: string[];
+  courseCategory?: string;
+  durationHours?: number;
+  instructor?: string;
+  verificationUrl?: string;
+  createdAt: string;
+}
+
 export interface TechCourseData {
   id: string;
   title: string;
   slug: string;
-  provider: string;
-  instructor?: string | null;
+  description: string;
   category: string;
   level: string;
   durationHours: number;
-  priceType: string;
-  priceAmount?: number;
-  certificateIncluded?: boolean;
-  rating: number;
-  totalStudents: number;
+  thumbnail?: string | null;
   thumbnailUrl?: string | null;
-  description: string;
-  syllabus?: string | null;
-  prerequisites?: string | null;
-  enrollUrl?: string;
-  isFeatured?: boolean;
+  instructor: string;
+  instructorRole?: string | null;
+  provider?: string;
+  badge?: string | null;
+  rating: number;
+  reviewCount?: number;
+  enrolledCount?: number;
+  totalStudents?: number;
+  lessonsCount?: number;
+  skills: string[];
+  isPublished?: boolean;
+  isFree?: boolean;
+  priceType?: string;
+  certificateIncluded?: boolean;
+  modules?: CourseModule[];
+  enrollment?: CourseEnrollment | null;
   createdAt?: Date | string;
 }
 

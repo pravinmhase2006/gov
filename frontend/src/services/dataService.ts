@@ -840,14 +840,72 @@ export const dataService = {
     return MOCK_TECH_JOBS;
   },
 
-  async getTechCourses(): Promise<TechCourse[]> {
+  async getTechCourses(params?: { category?: string; level?: string; search?: string; sort?: string }): Promise<any[]> {
     try {
-      const data = await apiRequest<TechCourse[]>('/content/tech-courses');
-      if (Array.isArray(data) && data.length > 0) return data;
+      const query = new URLSearchParams();
+      if (params?.category && params.category !== 'all') query.set('category', params.category);
+      if (params?.level && params.level !== 'all') query.set('level', params.level);
+      if (params?.search) query.set('search', params.search);
+      if (params?.sort) query.set('sort', params.sort);
+      
+      const queryString = query.toString() ? `?${query.toString()}` : '';
+      const res = await apiRequest<{ success: boolean; data: any[] }>(`/courses${queryString}`);
+      if (res && res.data && Array.isArray(res.data) && res.data.length > 0) {
+        return res.data;
+      }
     } catch {
       // Fallback
     }
     return MOCK_TECH_COURSES;
+  },
+
+  async getCourses(params?: { category?: string; level?: string; search?: string; sort?: string }): Promise<any[]> {
+    return this.getTechCourses(params);
+  },
+
+  async getCourseBySlug(slug: string, userId?: string): Promise<any | null> {
+    try {
+      const userParam = userId ? `?userId=${encodeURIComponent(userId)}` : '';
+      const res = await apiRequest<{ success: boolean; data: any }>(`/courses/${slug}${userParam}`);
+      if (res && res.data) return res.data;
+    } catch (err) {
+      console.error('Error fetching course by slug:', err);
+    }
+    return null;
+  },
+
+  async enrollCourse(courseId: string, userId: string, userName?: string, userEmail?: string): Promise<any> {
+    const res = await apiRequest<{ success: boolean; data: any }>('/courses/enroll', {
+      method: 'POST',
+      body: JSON.stringify({ courseId, userId, userName, userEmail }),
+    });
+    return res.data;
+  },
+
+  async updateCourseProgress(courseId: string, userId: string, lessonId: string, completed: boolean, userName?: string): Promise<any> {
+    const res = await apiRequest<{ success: boolean; data: any }>('/courses/progress', {
+      method: 'POST',
+      body: JSON.stringify({ courseId, userId, lessonId, completed, userName }),
+    });
+    return res.data;
+  },
+
+  async claimCourseCertificate(courseId: string, userId: string, recipientName: string, recipientEmail?: string): Promise<any> {
+    const res = await apiRequest<{ success: boolean; data: any }>('/courses/certificate/claim', {
+      method: 'POST',
+      body: JSON.stringify({ courseId, userId, recipientName, recipientEmail }),
+    });
+    return res.data;
+  },
+
+  async getCertificateByCode(code: string): Promise<any | null> {
+    try {
+      const res = await apiRequest<{ success: boolean; data: any }>(`/courses/certificate/${encodeURIComponent(code)}`);
+      if (res && res.data) return res.data;
+    } catch (err) {
+      console.error('Error fetching certificate:', err);
+    }
+    return null;
   },
 
   async getInternships(): Promise<Internship[]> {

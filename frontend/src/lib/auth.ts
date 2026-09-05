@@ -1,11 +1,3 @@
-import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
-import { cookies } from 'next/headers';
-import prisma from './db';
-
-const JWT_SECRET = process.env.JWT_SECRET || 'govtprep-secret-jwt-key-production-2026';
-const COOKIE_NAME = 'govtprep_token';
-
 export interface AuthUser {
   id: string;
   name: string;
@@ -14,42 +6,28 @@ export interface AuthUser {
   isVerified: boolean;
 }
 
-export async function hashPassword(password: string): Promise<string> {
-  return bcrypt.hash(password, 10);
+const COOKIE_NAME = 'govtprep_token';
+
+export function getCookie(name: string): string | null {
+  if (typeof document === 'undefined') return null;
+  const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+  return match ? decodeURIComponent(match[2]) : null;
 }
 
-export async function verifyPassword(plain: string, hashed: string): Promise<boolean> {
-  return bcrypt.compare(plain, hashed);
-}
-
-export function signToken(user: AuthUser): string {
-  return jwt.sign(
-    {
-      id: user.id,
-      name: user.name,
-      email: user.email,
-      role: user.role,
-      isVerified: user.isVerified,
-    },
-    JWT_SECRET,
-    { expiresIn: '7d' }
-  );
-}
-
-export function verifyToken(token: string): AuthUser | null {
+export function getCurrentUser(): AuthUser | null {
   try {
-    return jwt.verify(token, JWT_SECRET) as AuthUser;
-  } catch {
-    return null;
-  }
-}
-
-export async function getCurrentUser(): Promise<AuthUser | null> {
-  try {
-    const cookieStore = cookies();
-    const token = cookieStore.get(COOKIE_NAME)?.value;
+    const token = getCookie(COOKIE_NAME) || (typeof localStorage !== 'undefined' ? localStorage.getItem('govtprep_token') : null);
     if (!token) return null;
-    return verifyToken(token);
+    const base64Url = token.split('.')[1];
+    if (!base64Url) return null;
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(
+      atob(base64)
+        .split('')
+        .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+        .join('')
+    );
+    return JSON.parse(jsonPayload) as AuthUser;
   } catch {
     return null;
   }

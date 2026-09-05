@@ -6,8 +6,11 @@ export interface MockTestDetail {
   totalQuestions: number;
   totalMarks: number;
   passingMarks: number;
-  difficulty: string;
-  exam: {
+  positiveMarks?: number;
+  negativeMarks?: number;
+  instructions?: string;
+  difficulty?: string;
+  exam?: {
     name: string;
     slug: string;
     category?: string;

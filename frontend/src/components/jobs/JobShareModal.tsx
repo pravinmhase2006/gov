@@ -4,31 +4,44 @@ import React, { useState } from 'react';
 import { Share2, Send, Copy, Check, X } from 'lucide-react';
 
 interface JobShareModalProps {
-  title: string;
-  organization: string;
-  vacancies: string;
-  qualification: string;
-  lastDate: string;
-  slug: string;
+  title?: string;
+  jobTitle?: string;
+  organization?: string;
+  vacancies?: string;
+  qualification?: string;
+  lastDate?: string;
+  slug?: string;
+  jobSlug?: string;
+  onClose?: () => void;
 }
 
 export default function JobShareModal({
   title,
-  organization,
-  vacancies,
-  qualification,
-  lastDate,
+  jobTitle,
+  organization = 'Govt Organization',
+  vacancies = 'Multiple Posts',
+  qualification = 'Check Notification',
+  lastDate = 'Apply Soon',
   slug,
+  jobSlug,
+  onClose,
 }: JobShareModalProps) {
-  const [isOpen, setIsOpen] = useState(false);
+  const effectiveTitle = title || jobTitle || 'Government Job Notification';
+  const effectiveSlug = slug || jobSlug || '';
+  const [isOpen, setIsOpen] = useState(true);
   const [copied, setCopied] = useState(false);
 
-  const jobUrl = typeof window !== 'undefined' ? `${window.location.origin}/jobs/${slug}` : `https://govtprep.in/jobs/${slug}`;
+  const handleClose = () => {
+    setIsOpen(false);
+    if (onClose) onClose();
+  };
+
+  const jobUrl = typeof window !== 'undefined' ? `${window.location.origin}/jobs/${effectiveSlug}` : `https://govtprep.in/jobs/${effectiveSlug}`;
 
   const shareText = `🚨 *NEW GOVT JOB RECRUITMENT 2026* 🚨
 
 🏢 *Organization:* ${organization}
-📋 *Post:* ${title}
+📋 *Post:* ${effectiveTitle}
 👥 *Total Vacancies:* ${vacancies}
 🎓 *Qualification:* ${qualification}
 ⏳ *Last Date to Apply:* ${lastDate}
@@ -71,7 +84,7 @@ _Shared via GovtPrep India (Official Govt Jobs Portal)_`;
                 <Share2 className="w-4 h-4 text-blue-600" /> Share Recruitment Notice
               </h3>
               <button
-                onClick={() => setIsOpen(false)}
+                onClick={handleClose}
                 className="p-1 rounded-lg text-slate-400 hover:text-slate-600"
               >
                 <X className="w-4 h-4" />

@@ -1,6 +1,15 @@
-import { Metadata } from 'next';
+export interface SiteMetadata {
+  title: string;
+  description: string;
+  keywords: string;
+  metadataBase: URL;
+  alternates: { canonical: string };
+  openGraph: any;
+  twitter: any;
+  robots: { index: boolean; follow: boolean };
+}
 
-const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://govtprep.in';
+const BASE_URL = 'https://govtprep.in';
 
 export interface SEOProps {
   title: string;
@@ -32,7 +41,7 @@ export function constructMetadata({
     'GovtPrep India',
   ],
   noIndex = false,
-}: SEOProps): Metadata {
+}: SEOProps): SiteMetadata {
   const fullTitle = `${title} | GovtPrep India`;
   const canonicalUrl = canonical ? `${BASE_URL}${canonical}` : BASE_URL;
 
